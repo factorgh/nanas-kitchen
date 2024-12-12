@@ -6,7 +6,11 @@ export const axiosInstance = axios.create({
 });
 
 // Function to create a checkout session
-export const createCheckoutSession = async (cartItems, userDetails) => {
+export const createCheckoutSession = async (
+  cartItems,
+  userDetails,
+  totalPrice
+) => {
   console.log(cartItems, userDetails);
   try {
     const response = await axiosInstance.post(
@@ -14,6 +18,7 @@ export const createCheckoutSession = async (cartItems, userDetails) => {
       {
         cartItems,
         userDetails,
+        totalPrice,
       },
       {
         headers: {

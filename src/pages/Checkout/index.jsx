@@ -7,6 +7,11 @@ import PaymentModal from "../../components/payment-modal";
 import ProductCard from "../../components/product-card";
 import Wrapper from "../../components/wrapper";
 import { addToCart, removeFromCart } from "../../store/slices/cartSlice";
+import {
+  calculateDimensions,
+  calculateWeight,
+  fetchShippingRate,
+} from "../../utils/ship-station";
 
 const CheckoutPage = () => {
   const [showModal, setShowModal] = useState(false);
@@ -15,6 +20,31 @@ const CheckoutPage = () => {
   const [openPayment, setOpenPayment] = useState(false);
 
   const [selectedCountry, setSelectedCountry] = useState(null);
+  const [userDetails, setUserDetails] = useState({});
+  const [shippingCost, setShippingCost] = useState(0);
+  const [updatedCartItems, setUpdatedCartItems] = useState([]);
+  console.log("All update Cart Items", updatedCartItems);
+
+  useEffect(() => {
+    const updateShippingCost = async () => {
+      if (!selectedCountry || updatedCartItems.length === 0) return;
+      const weight = calculateWeight(updatedCartItems);
+      const dimensions = calculateDimensions(updatedCartItems);
+
+      try {
+        const cost = await fetchShippingRate(
+          weight,
+          dimensions,
+          selectedCountry
+        );
+        setShippingCost(cost);
+      } catch (error) {
+        console.error("Failed to update shipping cost:", error);
+      }
+    };
+
+    updateShippingCost();
+  }, [updatedCartItems, selectedCountry]);
 
   // UseEffects
   useEffect(() => {
@@ -43,7 +73,12 @@ const CheckoutPage = () => {
     }
   }, [selectedCountry]);
 
-  // Fetch zip codes based on selected state
+  // Hnadle Form submit
+  const onFinish = (values) => {
+    console.log("Form values:", values);
+    setUserDetails(values);
+    setOpenPayment(true);
+  };
 
   //Calculate total price
   const totalCartPrice = useSelector((state) =>
@@ -53,8 +88,10 @@ const CheckoutPage = () => {
 
   // CartItems
   const cartItems = useSelector((state) => state.cart.cart);
-  console.log(cartItems);
-
+  // Updated Cart Items for shopping calculation
+  useEffect(() => {
+    setUpdatedCartItems(cartItems);
+  }, [cartItems]);
   // Delete cart
   const handleDelete = (id) => {
     dispatch(removeFromCart(id));
@@ -112,10 +149,6 @@ const CheckoutPage = () => {
     // Close Modal
     setShowModal(false);
   };
-
-  // Render other products
-
-  // Modal content
 
   if (cartItems.length === 0) {
     return (
@@ -175,7 +208,12 @@ const CheckoutPage = () => {
               </div>
             </Modal>
             {/* User details Section  */}
-            <Form title="User Details" layout="vertical" className="mt-10">
+            <Form
+              title="User Details"
+              onFinish={onFinish}
+              layout="vertical"
+              className="mt-10 flex flex-col"
+            >
               <h4 className="text-xl font-bold mb-5">User Details</h4>
               <Row gutter={16}>
                 <Col span={12}>
@@ -235,37 +273,36 @@ const CheckoutPage = () => {
                   </Form.Item>
                 </Col>
               </Row>
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item label="state" name="state">
-                    <Input />
-                  </Form.Item>
-                </Col>
-              </Row>
+
+              <div className="flex justify-between mt-5">
+                <div>Sub Total</div>
+                <div>${totalCartPrice.toFixed(2)}</div>
+              </div>
+              <div className="flex justify-between mt-5">
+                <div>Shipping</div>
+                <div>${shippingCost.toFixed(2)}</div>
+              </div>
+
+              <div className="flex justify-between mt-5">
+                <div>Total</div>
+                <div className="text-2xl">
+                  ${(totalCartPrice + shippingCost).toFixed(2)}
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="w-full mt-5 bg-red-500 text-white py-3 rounded-md"
+              >
+                Place Order
+              </button>
             </Form>
-            <div className="flex justify-between mt-5">
-              <div>Subtotal</div>
-              <div>$17.98</div>
-            </div>
-            <div className="flex justify-between mt-5">
-              <div>Shipping</div>
-              <div>$5.00</div>
-            </div>
-            <div className="flex justify-between mt-5">
-              <div>Total</div>
-              <div>${totalCartPrice}</div>
-            </div>
-            <button
-              onClick={() => setOpenPayment(true)}
-              className="w-full mt-5 bg-red-500 text-white py-3 rounded-md"
-            >
-              Place Order
-            </button>
+
             <PaymentModal
               openPayment={openPayment}
               setOpenPayment={setOpenPayment}
-              userDetails={{}}
+              userDetails={userDetails}
               cartItems={cartItems}
+              totalPrice={totalCartPrice + shippingCost}
             />
           </Card>
         </div>

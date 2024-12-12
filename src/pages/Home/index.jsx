@@ -18,6 +18,9 @@ const HomePage = () => {
       image: "/shito-p1.jpg",
       price: 11.99,
       discount: "$17.99",
+      weight: 32,
+      height: 12,
+      length: 12,
     },
     {
       id: 2,
@@ -25,6 +28,9 @@ const HomePage = () => {
       image: "/shito-p1.jpg",
       price: 11.99,
       discount: "$17.99",
+      weight: 32,
+      height: 12,
+      length: 12,
     },
     {
       id: 3,
@@ -32,6 +38,9 @@ const HomePage = () => {
       image: "/shito-p1.jpg",
       price: 11.99,
       discount: "$17.99",
+      weight: 32,
+      height: 12,
+      length: 12,
     },
     // Add more products here
   ];
@@ -47,6 +56,9 @@ const HomePage = () => {
       discount: product.discount,
       quantity: 1,
       totalPrice: product.price,
+      weight: product.weight,
+      height: product.height,
+      length: product.length,
     };
     // Add to cart
     dispatch(addToCart(newProduct));

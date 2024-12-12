@@ -31,7 +31,7 @@ const ProductCard = ({ product, handleAddToCart }) => {
 
       <button
         onClick={() => handleAddToCart(product)}
-        className="bg-[#AF1313] text-white p-4 mt-3 w-48"
+        className="bg-red-500 text-white p-4 mt-3 w-48 rounded-lg"
       >
         Add To Cart
       </button>
