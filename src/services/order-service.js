@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create an Axios instance
 export const axiosInstance = axios.create({
-  baseURL: "http://localhost:8000/api/v1", // Replace with your API URL
+  baseURL: import.meta.env.VITE_API_URL, // Replace with your API URL
 });
 
 // Function to create a checkout session
@@ -32,3 +32,30 @@ export const createCheckoutSession = async (
     throw error; // Rethrow the error to handle it outside
   }
 };
+
+export const getAllOrders = async () => {
+  try {
+    const response = await axiosInstance.get("/orders/");
+    return response.data; // Return the response data
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    throw error; // Rethrow the error to handle it outside
+  }
+};
+
+// Get all carriesCodes
+export const getCarriersCode = async () => {
+  try {
+    const response = await axiosInstance.get("/orders/shipstation/carriers", {
+      params: {
+        carrierCode: "stamps_com",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching carriers:", error);
+    throw error;
+  }
+};
+
+export const getRates = () => {};

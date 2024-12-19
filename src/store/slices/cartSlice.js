@@ -19,16 +19,18 @@ const cartSlice = createSlice({
         state.cart.push({
           ...action.payload,
           quantity: 1,
-          totalPrice: action.payload.price,
+          totalPrice: action.payload.price, // initial totalPrice should be quantity * price
         });
       }
     },
 
     removeFromCart: (state, action) => {
+      // Use id instead of _id for consistency
       state.cart = state.cart.filter(
         (product) => product.id !== action.payload
       );
     },
+
     decreaseItemQuantity: (state, action) => {
       const item = state.cart.find((product) => product.id === action.payload);
       if (item) {
@@ -44,12 +46,13 @@ const cartSlice = createSlice({
         console.error("Item not found in cart for decrease:", action.payload);
       }
     },
+
     increaseItemQuantity: (state, action) => {
       console.log(state.cart, "Current cart items");
       console.log(action.payload, "Action payload");
 
       const item = state.cart.find((product) => product.id === action.payload);
-      console.log(item, "Item in slices");
+      console.log(item, "Item in slice");
       if (item) {
         item.quantity++;
         item.totalPrice = item.quantity * item.price;
@@ -57,6 +60,7 @@ const cartSlice = createSlice({
         console.error("Item not found in cart for increase:", action.payload);
       }
     },
+
     clearCart: (state) => {
       state.cart = [];
     },

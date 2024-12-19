@@ -1,8 +1,10 @@
 import { MenuOutlined } from "@ant-design/icons";
 import { Button, Divider, Drawer, Select } from "antd";
 import { useContext, useState } from "react";
+import { useDispatch } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { CountryContext } from "../context/country-context";
+import { clearCart } from "../store/slices/cartSlice";
 
 const Header = () => {
   const location = useLocation();
@@ -11,6 +13,7 @@ const Header = () => {
   const { userCountry, changeCountry } = useContext(CountryContext); // Use changeCountry
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false); // State for mobile menu
+  const dispatch = useDispatch();
 
   const links = [
     { name: "Home", href: "/" },
@@ -28,7 +31,7 @@ const Header = () => {
           <img
             src="/nana-logo.png"
             alt="nana-logo"
-            className="h-20 w-42 my-5"
+            className="md:h-20 md:w-48 my-5 h-15 w-32"
           />
         </Link>
 
@@ -52,23 +55,26 @@ const Header = () => {
             ))}
             <Divider type="vertical" className="h-10 bg-white" />
             <li>
-              <Button
+              {/* <Button
                 className="bg-white text-black rounded-md px-3"
                 onClick={() => setDropdownVisible((prev) => !prev)}
               >
                 {userCountry || "Select Country"}
-              </Button>
-              {dropdownVisible && (
-                <Select
-                  className="ml-3"
-                  defaultValue={userCountry}
-                  style={{ width: 180 }}
-                  onChange={(value) => changeCountry(value)} // Use changeCountry here
-                >
-                  <Option value="USA">USA</Option>
-                  <Option value="GHANA">GHANA</Option>
-                </Select>
-              )}
+              </Button> */}
+
+              <Select
+                className="ml-3"
+                defaultValue={userCountry}
+                style={{ width: 180 }}
+                onChange={(value) => {
+                  // Clear the cart
+                  dispatch(clearCart());
+                  changeCountry(value);
+                }} // Use changeCountry here
+              >
+                <Option value="USA">USA</Option>
+                <Option value="GHANA">GHANA</Option>
+              </Select>
             </li>
           </ul>
         </div>
@@ -92,10 +98,7 @@ const Header = () => {
           <ul className="flex flex-col space-y-4 text-black">
             {links.map((link) => (
               <li key={link.name}>
-                <Link
-                  to={link.href}
-                  onClick={() => setMenuOpen(false)} // Close drawer on link click
-                >
+                <Link to={link.href} onClick={() => setMenuOpen(false)}>
                   {link.name}
                 </Link>
               </li>
@@ -113,10 +116,14 @@ const Header = () => {
                   className="ml-3 mt-2"
                   defaultValue={userCountry}
                   style={{ width: 180 }}
-                  onChange={(value) => changeCountry(value)} // Use changeCountry here
+                  onChange={(value) => {
+                    dispatch(clearCart());
+                    changeCountry(value);
+                    setMenuOpen(false);
+                  }} // Use changeCountry here
                 >
                   <Option value="USA">USA</Option>
-                  <Option value="GHANA">GHANA</Option>
+                  <Option value="Ghana">GHANA</Option>
                 </Select>
               )}
             </li>

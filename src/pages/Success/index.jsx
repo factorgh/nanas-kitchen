@@ -7,7 +7,7 @@ const SuccessPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <Card className="w-full max-w-md p-6 shadow-lg">
+      <Card className="w-full max-w-md p-6 shadow-lg mx-5">
         <div className="text-center">
           <CheckCircleOutlined className="text-green-500 text-5xl mb-4" />
           <h1 className="text-2xl font-bold text-gray-800 mb-2">

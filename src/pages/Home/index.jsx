@@ -1,65 +1,54 @@
 import { Card } from "antd";
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import HeroSection from "../../components/hero";
 import ProductCard from "../../components/product-card";
 import Wrapper from "../../components/wrapper";
+import { CountryContext } from "../../context/country-context";
+import { getAllProducts } from "../../services/product-service";
 import { addToCart } from "../../store/slices/cartSlice";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const products = [
-    {
-      id: 1,
-      title: "16oz Black Shitor(Mild)",
-      image: "/shito-p1.jpg",
-      price: 11.99,
-      discount: "$17.99",
-      weight: 32,
-      height: 12,
-      length: 12,
-    },
-    {
-      id: 2,
-      title: "16oz Black Shitor(Hot)",
-      image: "/shito-p1.jpg",
-      price: 11.99,
-      discount: "$17.99",
-      weight: 32,
-      height: 12,
-      length: 12,
-    },
-    {
-      id: 3,
-      title: "16oz Black Shitor(Mild)",
-      image: "/shito-p1.jpg",
-      price: 11.99,
-      discount: "$17.99",
-      weight: 32,
-      height: 12,
-      length: 12,
-    },
-    // Add more products here
-  ];
+  const [products, setProducts] = useState([]);
+  const { userCountry } = useContext(CountryContext);
+
+  // Current country of user
+
+  console.log(userCountry);
+
+  // Get all products
+  useEffect(() => {
+    const getProducts = async () => {
+      const res = await getAllProducts();
+      setProducts(res);
+    };
+    getProducts();
+  }, []);
+
+  // Country Checker
 
   // Add To cart on home page
   const handleAddToCart = (product) => {
+    const convertedPrice =
+      userCountry === "USA" ? product.dollarDiscount : product.cediDiscount;
     console.log(product);
     const newProduct = {
-      id: product.id,
+      id: product._id,
       title: product.title,
       image: product.image,
-      price: product.price,
-      discount: product.discount,
+      price: convertedPrice,
       quantity: 1,
       totalPrice: product.price,
       weight: product.weight,
       height: product.height,
       length: product.length,
+      width: product.width,
     };
+
     // Add to cart
     dispatch(addToCart(newProduct));
 
@@ -77,90 +66,104 @@ const HomePage = () => {
 
   return (
     <Wrapper>
+      {/* Hero Section */}
       <motion.div
         ref={heroRef}
         initial={{ opacity: 0, y: 50 }}
         animate={heroInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.8, ease: "easeOut" }}
+        className=""
       >
         <HeroSection />
       </motion.div>
 
+      {/* Introduction Section */}
       <motion.div
         ref={productsRef}
-        initial={{ opacity: 0, scale: 0.8 }}
-        whileInView={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 1, scale: 0.8 }}
         animate={productsInView ? { opacity: 1, scale: 1 } : {}}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="flex flex-col justify-center items-center mt-10"
+        className="flex flex-col justify-center items-center mt-10 px-4 md:px-8"
       >
-        <h1 className="text-4xl font-normal mb-4">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-normal text-center mb-4">
           &ldquo;Good Food Is The Foundation Of Genuine Happiness&ldquo;
         </h1>
-        <p className="text-4xl mb-20 font-normal">-- Auguste Escoffer</p>
-        <h1 className="text-5xl font-bold mb-5">Click to buy online</h1>
-        <p className="text-md text-slate-600">
+        <p className="text-xl md:text-2xl lg:text-3xl text-center mb-20">
+          -- Auguste Escoffer
+        </p>
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-center">
+          Click to buy online
+        </h1>
+        <p className="text-sm md:text-md md:text-lg text-slate-600 text-center">
           Shop from our variety of Shito in different sizes
         </p>
       </motion.div>
 
+      {/* Product Grid */}
       <motion.div
         ref={productsRef}
         initial={{ opacity: 0, y: 50 }}
         animate={productsInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.8, ease: "circInOut" }}
-        className="container mx-auto mb-10 mt-10"
+        className="container mx-auto px-4 md:px-8 lg:px-16 mb-10 mt-10"
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
             <ProductCard
               handleAddToCart={handleAddToCart}
-              key={product.id}
+              key={product._id}
               product={product}
             />
           ))}
         </div>
-        {/* Recipe section */}
-        <div className="flex items-center justify-center gap-20 mt-20">
-          {/* First section */}
+
+        {/* Recipe Section */}
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-10 mt-20 px-4">
+          {/* First Section (Images) */}
           <motion.div
             ref={gridRef}
             initial={{ opacity: 0, y: 50 }}
             animate={gridInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, ease: "circInOut" }}
-            className="flex flex-col gap-4 col-span-1  items-end mt-10"
+            className="flex flex-col gap-4 items-center lg:items-end"
           >
-            <img src="/recipe-1.jpeg" alt="recipe-1" className="w-64" />
-            <img src="/recipe-2.jpg" alt="recipe-2" className="w-64 " />
+            <img
+              src="/recipe-1.jpeg"
+              alt="recipe-1"
+              className="w-full max-w-sm object-cover rounded"
+            />
+            <img
+              src="/recipe-2.jpg"
+              alt="recipe-2"
+              className="w-full max-w-sm object-cover rounded"
+            />
           </motion.div>
-          {/* Second section */}
-          <div className=" mt-10">
-            <Card className="flex flex-col gap-4 items-center justify-center px-16 h-[600px] shadow-xl w-[550px] rounded-tr-[100px] rounded-tl-[100px]">
+
+          {/* Second Section (Card) */}
+          <div className="flex items-center justify-center ">
+            <Card className="flex flex-col gap-4 items-center justify-center px-8 md:px-16 py-10 shadow-xl w-full max-w-lg lg:h-[600px] rounded-tr-[50px] rounded-tl-[50px]">
               <h3
                 style={{
                   fontFamily: '"Kaushan Script", cursive',
                 }}
-                className="text-6xl italic text-red-800 text-center mb-5"
+                className="text-3xl md:text-4xl lg:text-6xl italic text-red-800 text-center mb-5"
               >
                 Enjoy these
               </h3>
-
-              <p className="text-center text-5xl font-bold mb-20">RECIPES</p>
-
-              <div>
-                <p>
-                  We want you to enjoy the foods that we enjoy; experience the
-                  joy that we constantly live, and so here, we are going to
-                  share many wonderful recipes with you. Some of these recipes
-                  have been passed down for generations, some are our own
-                  magical concoctions and the rest are meals that combine
-                  perfectly with our shito.
-                </p>
-              </div>
+              <p className="text-lg md:text-2xl lg:text-5xl font-bold mb-10 text-center">
+                RECIPES
+              </p>
+              <p className="text-sm md:text-base lg:text-lg text-center">
+                We want you to enjoy the foods that we enjoy; experience the joy
+                that we constantly live, and so here, we are going to share many
+                wonderful recipes with you. Some of these recipes have been
+                passed down for generations, some are our own magical
+                concoctions, and the rest are meals that combine perfectly with
+                our shito.
+              </p>
             </Card>
           </div>
         </div>
-        {/* End of recipe section */}
       </motion.div>
     </Wrapper>
   );

@@ -1,7 +1,15 @@
 /* eslint-disable react/prop-types */
 import { motion } from "framer-motion";
+import { useContext } from "react";
+import { CountryContext } from "../context/country-context";
+import { formatCurrency } from "../utils/currency-formatter";
 
 const ProductCard = ({ product, handleAddToCart }) => {
+  const { userCountry } = useContext(CountryContext);
+
+  const formattedPrice = (price, currency, locale) =>
+    formatCurrency(price, currency, locale);
+
   return (
     <motion.div
       animate={{
@@ -24,11 +32,24 @@ const ProductCard = ({ product, handleAddToCart }) => {
       <h3 className="text-2xl font-bold">{product.title}</h3>
       {/* Price */}
       <p>
-        <span className="line-through mr-2 text-lg">{product.discount}</span>
-        <span className="text-lg"> $ {product.price}</span>
+        <span className="line-through mr-2 text-lg">
+          {formattedPrice(
+            userCountry === "USA" ? product.dollarPrice : product.cediPrice,
+            userCountry === "USA" ? "USD" : "GHS",
+            userCountry === "USA" ? "en-US" : "en-GH"
+          )}
+        </span>
+        <span className="text-lg">
+          {formattedPrice(
+            userCountry === "USA"
+              ? product.dollarDiscount
+              : product.cediDiscount,
+            userCountry === "USA" ? "USD" : "GHS",
+            userCountry === "USA" ? "en-US" : "en-GH"
+          )}
+        </span>
       </p>
       {/* Button */}
-
       <button
         onClick={() => handleAddToCart(product)}
         className="bg-red-500 text-white p-4 mt-3 w-48 rounded-lg"

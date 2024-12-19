@@ -1,29 +1,37 @@
 import axios from "axios";
 import { Buffer } from "buffer";
 
+export const API_KEY = import.meta.env.VITE_ENV_SHIP_STATION_API_KEY;
+export const API_SECRET = import.meta.env.VITE_ENV_SHIP_STATION_SECRET_KEY;
+
 export const fetchShippingRate = async (
   weight,
-  dimensions,
-  userCountry
-  //   fromPostalCode
+  /*************  ✨ Codeium Command ⭐  *************/
+  /**
+   * Fetch shipping rates from ShipStation
+   * @param {number} weight Package weight in ounces
+   * @param {{length: number, width: number, height: number}} dimensions Package dimensions in inches
+   * @param {string} userCountry User country code (e.g. "USA")
+   * @param {string} postalCode User postal code (e.g. "12345")
+   * @returns {Promise<number>} The lowest shipping rate or 0 if there is an error
+   */
+  /******  72e9f1b8-dcf8-407b-aa76-a832c5bca0ed  *******/ dimensions,
+  userCountry,
+  postalCode
 ) => {
-  const API_KEY = import.meta.env.VITE_ENV_SHIP_STATION_API_KEY;
-  const API_SECRET = import.meta.env.VITE_ENV_SHIP_STATION_SECRET_KEY;
-  console.log(API_SECRET);
-  console.log(API_KEY);
-
   const auth = Buffer.from(`${API_KEY}:${API_SECRET}`).toString("base64");
-  console.log(auth);
 
   const payload = {
-    carrierCode: "stamps_com", // Or dynamically set based on your configuration
-    fromPostalCode: "77406", // Origin postal code
+    carrierCode: "stamps_com",
+    fromPostalCode: "77406",
     toCountry: userCountry,
+    toPostalCode: postalCode,
+    serviceCode: "usps_ground_advantage",
     weight: { value: weight, units: "ounces" },
     dimensions: {
       units: "inches",
       length: dimensions.length,
-      width: 0,
+      width: dimensions.width,
       height: dimensions.height,
     },
     packageCode: "package",

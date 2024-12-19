@@ -10,9 +10,10 @@ export const CountryProvider = ({ children }) => {
   useEffect(() => {
     const fetchCountry = async () => {
       try {
-        const response = await fetch("https://ipapi.co/json/"); // Use a geolocation API
+        const response = await fetch("https://ipapi.co/json/");
         const data = await response.json();
-        setUserCountry(data.country_name); // Set country name as default
+        console.log(data);
+        setUserCountry(data.country_name);
       } catch (error) {
         console.error("Error fetching country data:", error);
         setUserCountry("Unknown");
