@@ -9,7 +9,7 @@ const Orders = () => {
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 15,
+    pageSize: 10,
     total: 0,
   });
 
@@ -17,12 +17,14 @@ const Orders = () => {
     setLoading(true);
     try {
       const response = await getAllOrders();
-      console.log(response);
-
-      setOrders(response?.map((order) => ({ ...order, key: order._id })));
+      const formattedOrders = response?.map((order) => ({
+        ...order,
+        key: order._id,
+      }));
+      setOrders(formattedOrders);
       setPagination((prev) => ({
         ...prev,
-        total: response?.length,
+        total: formattedOrders.length,
       }));
     } catch (err) {
       setError("Failed to load orders. Please try again later.");
@@ -36,18 +38,22 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
-  const handleTableChange = (newPagination) => {
+  const handleTableChange = (pagination, filters) => {
     setPagination({
       ...pagination,
-      current: newPagination.current,
-      pageSize: newPagination.pageSize,
     });
-  };
 
-  const paginatedData = orders.slice(
-    (pagination.current - 1) * pagination.pageSize,
-    pagination.current * pagination.pageSize
-  );
+    if (filters.status && filters.status.length > 0) {
+      // Apply filtering based on the selected filter
+      const filtered = filters.status.includes("all")
+        ? orders
+        : orders.filter((order) => filters.status.includes(order.status));
+      setPagination((prev) => ({
+        ...prev,
+        total: filtered.length,
+      }));
+    }
+  };
 
   const columns = [
     {
@@ -90,6 +96,16 @@ const Orders = () => {
             : "red";
         return <Tag color={color}>{status.toUpperCase()}</Tag>;
       },
+      filters: [
+        { text: "All", value: "all" },
+        { text: "Completed", value: "completed" },
+        { text: "Processing", value: "processing" },
+        { text: "Cancelled", value: "cancelled" },
+      ],
+      onFilter: (value, record) => {
+        if (value === "all") return true;
+        return record.status === value;
+      },
     },
   ];
 
@@ -102,7 +118,7 @@ const Orders = () => {
       <h1 className="text-lg font-bold mb-4">Orders</h1>
       <Table
         columns={columns}
-        dataSource={paginatedData}
+        dataSource={orders}
         pagination={{
           current: pagination.current,
           pageSize: pagination.pageSize,
