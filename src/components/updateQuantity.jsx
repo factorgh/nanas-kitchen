@@ -4,6 +4,10 @@ import {
   decreaseItemQuantity,
   increaseItemQuantity,
 } from "../store/slices/cartSlice";
+import {
+  decreaseItemQuantityDollar,
+  increaseItemQuantityDollar,
+} from "../store/slices/dollarSlice";
 
 const UpdateQuantity = ({ id }) => {
   const dispatch = useDispatch();
@@ -15,9 +19,11 @@ const UpdateQuantity = ({ id }) => {
   console.log(id, "id item");
   const handleIncrement = () => {
     dispatch(increaseItemQuantity(id));
+    dispatch(increaseItemQuantityDollar(id));
   };
   const handleDecrement = () => {
     dispatch(decreaseItemQuantity(id));
+    dispatch(decreaseItemQuantityDollar(id));
   };
   return (
     <div className="flex gap-3 items-center">

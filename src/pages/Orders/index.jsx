@@ -5,19 +5,49 @@ import { getAllOrders } from "../../services/order-service";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 15,
+    total: 0,
+  });
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const response = await getAllOrders();
+      console.log(response);
+
+      setOrders(response?.map((order) => ({ ...order, key: order._id })));
+      setPagination((prev) => ({
+        ...prev,
+        total: response?.length,
+      }));
+    } catch (err) {
+      setError("Failed to load orders. Please try again later.");
+      console.error("Error fetching orders:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await getAllOrders();
-        setOrders(response);
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      }
-    };
-
     fetchOrders();
-  });
+  }, []);
+
+  const handleTableChange = (newPagination) => {
+    setPagination({
+      ...pagination,
+      current: newPagination.current,
+      pageSize: newPagination.pageSize,
+    });
+  };
+
+  const paginatedData = orders.slice(
+    (pagination.current - 1) * pagination.pageSize,
+    pagination.current * pagination.pageSize
+  );
 
   const columns = [
     {
@@ -28,10 +58,12 @@ const Orders = () => {
     },
     {
       title: "Customer",
-      dataIndex: "customer", // Assumes `customer` is the field in your data representing the customer object
-      key: "customer", // Unique key for React rendering
+      dataIndex: "customer",
+      key: "customer",
       render: (_, record) =>
-        `${record.userDetails.firstName} ${record.userDetails.lastName}`,
+        record.userDetails
+          ? `${record.userDetails.firstName} ${record.userDetails.lastName}`
+          : "Unknown Customer",
     },
     {
       title: "Total Amount",
@@ -51,24 +83,35 @@ const Orders = () => {
       key: "status",
       render: (status) => {
         const color =
-          status === "Completed"
+          status === "completed"
             ? "green"
-            : status === "Processing"
-            ? "gold"
+            : status === "processing"
+            ? "blue"
             : "red";
-        return <Tag color={color}>{status}</Tag>;
+        return <Tag color={color}>{status.toUpperCase()}</Tag>;
       },
     },
   ];
+
+  if (error) {
+    return <p>{error}</p>;
+  }
 
   return (
     <div>
       <h1 className="text-lg font-bold mb-4">Orders</h1>
       <Table
         columns={columns}
-        dataSource={orders}
-        pagination={{ pageSize: 5 }}
+        dataSource={paginatedData}
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+          showSizeChanger: true,
+        }}
+        onChange={handleTableChange}
         bordered
+        loading={loading}
       />
     </div>
   );

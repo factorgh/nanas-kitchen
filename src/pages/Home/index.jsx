@@ -8,7 +8,11 @@ import ProductCard from "../../components/product-card";
 import Wrapper from "../../components/wrapper";
 import { CountryContext } from "../../context/country-context";
 import { getAllProducts } from "../../services/product-service";
-import { addToCart } from "../../store/slices/cartSlice";
+import { addToCart, clearCart } from "../../store/slices/cartSlice";
+import {
+  addToDollarCart,
+  clearDollarCart,
+} from "../../store/slices/dollarSlice";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -33,16 +37,15 @@ const HomePage = () => {
 
   // Add To cart on home page
   const handleAddToCart = (product) => {
-    const convertedPrice =
-      userCountry === "USA" ? product.dollarDiscount : product.cediDiscount;
+    dispatch(clearCart());
     console.log(product);
     const newProduct = {
       id: product._id,
       title: product.title,
       image: product.image,
-      price: convertedPrice,
+      price: product.cediDiscount,
       quantity: 1,
-      totalPrice: product.price,
+      totalPrice: product.cediDiscount,
       weight: product.weight,
       height: product.height,
       length: product.length,
@@ -51,6 +54,28 @@ const HomePage = () => {
 
     // Add to cart
     dispatch(addToCart(newProduct));
+
+    // Navigate to check out page
+    navigate("/checkout");
+  };
+  const handleDollarAddToCart = (product) => {
+    dispatch(clearDollarCart());
+    console.log(product);
+    const newProduct = {
+      id: product._id,
+      title: product.title,
+      image: product.image,
+      price: product.dollarDiscount,
+      quantity: 1,
+      totalPrice: product.dollarDiscount,
+      weight: product.weight,
+      height: product.height,
+      length: product.length,
+      width: product.width,
+    };
+
+    // Add to cart
+    dispatch(addToDollarCart(newProduct));
 
     // Navigate to check out page
     navigate("/checkout");
@@ -110,7 +135,10 @@ const HomePage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
             <ProductCard
-              handleAddToCart={handleAddToCart}
+              handleAddToCart={() => {
+                handleAddToCart(product);
+                handleDollarAddToCart(product);
+              }}
               key={product._id}
               product={product}
             />

@@ -1,3 +1,4 @@
+import { message } from "antd";
 import axios from "axios";
 import { Buffer } from "buffer";
 
@@ -21,6 +22,10 @@ export const fetchShippingRate = async (
 ) => {
   const auth = Buffer.from(`${API_KEY}:${API_SECRET}`).toString("base64");
 
+  console.log(
+    `-------------------------${weight}------------------------${dimensions}----------------${userCountry}----------------${postalCode}----------------`
+  );
+
   const payload = {
     carrierCode: "stamps_com",
     fromPostalCode: "77406",
@@ -30,9 +35,9 @@ export const fetchShippingRate = async (
     weight: { value: weight, units: "ounces" },
     dimensions: {
       units: "inches",
-      length: dimensions.length,
-      width: dimensions.width,
-      height: dimensions.height,
+      length: 12,
+      width: 12,
+      height: 12,
     },
     packageCode: "package",
   };
@@ -53,6 +58,7 @@ export const fetchShippingRate = async (
     const rates = response.data;
     return rates.length > 0 ? rates[0].shipmentCost : 0;
   } catch (error) {
+    message.error("Zip code is not a valid.Please try again");
     console.error("Error fetching shipping rates:", error);
     throw error;
   }
@@ -66,6 +72,7 @@ export const calculateWeight = (cartItems) => {
 };
 
 export const calculateDimensions = (cartItems) => {
+  console.log(cartItems);
   return cartItems.reduce(
     (total, item) => {
       total.length += item.length;

@@ -17,7 +17,7 @@ const Wrapper = ({ children }) => {
       <Header />
 
       <div className="">
-        <div className="overflow-scroll ">{children}</div>
+        <div className="">{children}</div>
       </div>
       <Footer />
     </motion.div>

@@ -34,18 +34,18 @@ const ProductCard = ({ product, handleAddToCart }) => {
       <p>
         <span className="line-through mr-2 text-lg">
           {formattedPrice(
-            userCountry === "USA" ? product.dollarPrice : product.cediPrice,
-            userCountry === "USA" ? "USD" : "GHS",
-            userCountry === "USA" ? "en-US" : "en-GH"
+            userCountry === "GHANA" ? product.dollarPrice : product.cediPrice,
+            userCountry === "GHANA" ? "GHS" : "USD",
+            userCountry === "GHANA" ? "en-GH" : "en-US"
           )}
         </span>
         <span className="text-lg">
           {formattedPrice(
-            userCountry === "USA"
+            userCountry === "GHANA"
               ? product.dollarDiscount
               : product.cediDiscount,
-            userCountry === "USA" ? "USD" : "GHS",
-            userCountry === "USA" ? "en-US" : "en-GH"
+            userCountry === "GHANA" ? "GHS" : "USD",
+            userCountry === "GHANA" ? "en-GH" : "en-US"
           )}
         </span>
       </p>

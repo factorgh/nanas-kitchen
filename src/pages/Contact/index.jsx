@@ -12,7 +12,7 @@ const ContactPage = () => {
 
       <div className="container mx-auto px-4 sm:px-8 lg:px-20 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20">
         {/* Contact Information Section */}
-        <div className="mb-10 md:mb-0">
+        <div className="mb-10 md:mb-10">
           <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-5">
             Contact Us
           </h3>

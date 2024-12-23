@@ -1,19 +1,20 @@
 import {
   Button,
   Card,
+  Checkbox,
   Col,
   Form,
   Input,
   message,
   Modal,
   Row,
-  Switch,
 } from "antd";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CartItem from "../../components/cart-item";
 
+import { useForm } from "antd/es/form/Form";
 import ProductCard from "../../components/product-card";
 import Wrapper from "../../components/wrapper";
 import { CountryContext } from "../../context/country-context";
@@ -22,7 +23,15 @@ import {
   getCarriersCode,
 } from "../../services/order-service";
 import { getAllProducts } from "../../services/product-service";
-import { addToCart, removeFromCart } from "../../store/slices/cartSlice";
+import {
+  addToCart,
+  clearCart,
+  removeFromCart,
+} from "../../store/slices/cartSlice";
+import {
+  addToDollarCart,
+  clearDollarCart,
+} from "../../store/slices/dollarSlice";
 import { formatCurrency } from "../../utils/currency-formatter";
 import { handlePayStackPayment } from "../../utils/paystack-handler";
 import {
@@ -35,22 +44,24 @@ const CheckoutPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const { userCountry } = useContext(CountryContext);
+  const naivigate = useNavigate();
+
   console.log(userCountry);
   const dispatch = useDispatch();
 
-  const [shippingCost, setShippingCost] = useState(0);
+  const [shippingCost, setShippingCost] = useState(() => {
+    if (userCountry === "GHANA") {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
   const [updatedCartItems, setUpdatedCartItems] = useState([]);
   const [isLoadingShippingCost, setIsLoadingShippingCost] = useState(false);
-  // const [userDetails, setUserDetails] = useState({
-  //   firstName: "",
-  //   lastName: "",
-  //   country: "",
-  //   email: "",
-  //   phone: "",
-  //   address: "",
-  //   state: "",
-  //   zip: "",
-  // });
+  const [savedDI, setSavedDI] = useState([]);
+  const [savedCT, setSavedCT] = useState([]);
+  console.log(savedDI);
+  console.log(savedCT);
 
   const [protectivePackage, setIsProtectivePackage] = useState(false);
   const formattedPrice = (price, currency, locale) =>
@@ -58,6 +69,7 @@ const CheckoutPage = () => {
 
   const formRef = useRef(null);
   const [postalCode, setPostalCode] = useState(null);
+  const [form] = useForm();
 
   console.log("All update Cart Items", updatedCartItems);
   const [products, setProducts] = useState([]);
@@ -71,6 +83,10 @@ const CheckoutPage = () => {
     };
     getProducts();
   }, []);
+  useEffect(() => {
+    // Update the country field whenever userCountry changes
+    form.setFieldsValue({ country: userCountry });
+  }, [userCountry, form]);
 
   useEffect(() => {
     const updateShippingCost = async () => {
@@ -140,6 +156,12 @@ const CheckoutPage = () => {
       0
     )
   );
+  const totalCartDollarPrice = useSelector((state) =>
+    state.dollarCart.dollarCart.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    )
+  );
 
   const protectivePackageCost = 30;
 
@@ -159,20 +181,27 @@ const CheckoutPage = () => {
     };
 
     console.log("Form values after processing:", updatedValues);
-    const convertedPrice = Math.round(calculatedTotalPrice);
+    // const convertedPrice = Math.round(calculatedTotalPrice);
 
     await formRef.current.validateFields();
 
-    if (countryCode === "US") {
+    if (countryCode !== "GH") {
       handleStripeCheckout(updatedValues);
     } else {
       handlePayStackPayment(
         setPaystackLoading,
         updatedCartItems,
         updatedValues,
-        convertedPrice
+        calculatedTotalPrice,
+        handleRedirect
+        // convertedPrice
       );
     }
+  };
+
+  const handleRedirect = () => {
+    naivigate("/success");
+    message.success("Payment successful! Redirecting to home page...");
   };
 
   //Calculate total price
@@ -181,10 +210,35 @@ const CheckoutPage = () => {
 
   // CartItems
   const cartItems = useSelector((state) => state.cart.cart);
+  const dollarCartItems = useSelector((state) => state.dollarCart.dollarCart);
+  console.log(
+    dollarCartItems,
+    "----------------------Dollar Cart Items--------------------"
+  );
   console.log(
     cartItems,
     "----------------------Cart Items--------------------"
   );
+
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  useEffect(() => {
+    localStorage.setItem("dollarCartItems", JSON.stringify(dollarCartItems));
+  }, [dollarCartItems]);
+
+  useEffect(() => {
+    const savedCartItems = localStorage.getItem("cartItems");
+    const savedDollarCartItems = localStorage.getItem("dollarCartItems");
+    if (savedDollarCartItems.length !== 0) {
+      setSavedDI(savedDollarCartItems);
+    }
+    if (savedCartItems.length !== 0) {
+      setSavedCT(savedCartItems);
+    }
+  }, []);
+
   // Updated Cart Items for shopping calculation
   useEffect(() => {
     setUpdatedCartItems(cartItems);
@@ -202,23 +256,49 @@ const CheckoutPage = () => {
       ))}
     </div>
   );
+  const renderDollarCartItems = () => (
+    <div className="flex flex-col gap-5">
+      {cartItems.map((product) => (
+        <CartItem onDelete={handleDelete} key={product.id} product={product} />
+      ))}
+    </div>
+  );
 
   // handle add to cart
   const handleAddToCart = (product) => {
-    const convertedPrice =
-      userCountry === "USA" ? product.dollarPrice : product.cediPrice;
-
     const newProduct = {
       id: product._id,
       title: product.title,
       image: product.image,
-      price: convertedPrice,
+      price: product.cediDiscount,
       quantity: 1,
-      totalPrice: convertedPrice, // Initial total price
+      totalPrice: product.cediDiscount,
+      weight: product.weight,
+      height: product.height,
+      length: product.length,
+      width: product.width,
     };
 
     dispatch(addToCart(newProduct));
-    setShowModal(false); // Close the modal
+    setShowModal(false);
+  };
+
+  const handleDollarAddToCart = (product) => {
+    const newProduct = {
+      id: product._id,
+      title: product.title,
+      image: product.image,
+      price: product.dollarDiscount,
+      quantity: 1,
+      totalPrice: product.dollarDiscount,
+      weight: product.weight,
+      height: product.height,
+      length: product.length,
+      width: product.width,
+    };
+
+    dispatch(addToDollarCart(newProduct));
+    setShowModal(false);
   };
 
   if (cartItems.length === 0) {
@@ -227,7 +307,13 @@ const CheckoutPage = () => {
         <div className="mx-auto container">
           <div className="flex justify-center items-center h-screen bg-gray-50">
             <div className="h-96 flex flex-col justify-center items-center">
-              <Card className="flex flex-col  justify-center items-center">
+              <Card
+                onClick={() => {
+                  dispatch(clearDollarCart());
+                  dispatch(clearCart());
+                }}
+                className="flex flex-col  justify-center items-center"
+              >
                 <h3 className="text-3xl font-bold mb-5 text-center">
                   Ooooops !!! Cart is empty
                   <Link to="/">
@@ -245,23 +331,29 @@ const CheckoutPage = () => {
   }
 
   // Add total price calculation logic here
+  const calculateStripeTotal = totalCartDollarPrice + shippingCost;
+  console.log(
+    "----------------------------------------------------------------"
+  );
+  console.log(calculateStripeTotal);
 
   const handleStripeCheckout = async (updatedValues) => {
-    const totalPrice = totalCartPrice + shippingCost;
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
       const data = await createCheckoutSession(
         cartItems,
         updatedValues,
-        totalPrice
+        calculateStripeTotal
       );
       // Redirect to Stripe checkout URL
-      window.location.href = data.url;
+      // window.location.href = data.url;
+      window.open(data.url, "_blank", "noopener,noreferrer");
     } catch (error) {
-      message.error(error.response.data.error);
+      message.error("An error occurred!. Please try again later");
+      // message.error(error.response.data.error);
       console.error("Error during Stripe Checkout:", error);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -274,7 +366,9 @@ const CheckoutPage = () => {
               Place Order Now
             </h3>
             <h4 className="text-xl font-bold mb-5">Item(s)</h4>
-            {renderCartItems()}
+            {userCountry !== "GHANA"
+              ? renderDollarCartItems()
+              : renderCartItems()}
             <button
               onClick={() => setShowModal(true)}
               className="w-full mt-5 bg-red-500 text-white py-3 rounded-md"
@@ -290,7 +384,10 @@ const CheckoutPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
                 {products.map((product) => (
                   <ProductCard
-                    handleAddToCart={handleAddToCart}
+                    handleAddToCart={() => {
+                      handleAddToCart(product);
+                      handleDollarAddToCart(product);
+                    }}
                     key={product.id}
                     product={product}
                   />
@@ -299,6 +396,7 @@ const CheckoutPage = () => {
             </Modal>
             {/* User details Section  */}
             <Form
+              form={form}
               title="User Details"
               onFinish={onFinish}
               layout="vertical"
@@ -345,6 +443,10 @@ const CheckoutPage = () => {
                     label="Email"
                     rules={[
                       { required: true, message: "This field is required" },
+                      {
+                        type: "email",
+                        message: "Please enter a valid email address",
+                      },
                     ]}
                     name="email"
                   >
@@ -405,13 +507,17 @@ const CheckoutPage = () => {
                   </Form.Item>
                 </Col>
               </Row>
-              {userCountry !== "USA" && (
+              {userCountry === "GHANA" && (
                 <Row>
-                  <Form.Item label="Protective Package">
-                    <Switch
+                  <Form.Item label="">
+                    <Checkbox
                       checked={protectivePackage}
-                      onChange={handleProtectivePackageChange}
-                    />
+                      onChange={(e) =>
+                        handleProtectivePackageChange(e.target.checked)
+                      }
+                    >
+                      Need Protective Package (GHC 30.00)
+                    </Checkbox>
                   </Form.Item>
                 </Row>
               )}
@@ -421,22 +527,28 @@ const CheckoutPage = () => {
                 <div>
                   {" "}
                   {formattedPrice(
-                    userCountry === "USA" ? totalCartPrice : totalCartPrice,
-                    userCountry === "USA" ? "USD" : "GHS",
-                    userCountry === "USA" ? "en-US" : "en-GH"
+                    userCountry !== "GHANA"
+                      ? totalCartDollarPrice
+                      : totalCartPrice,
+                    userCountry !== "GHANA" ? "USD" : "GHS",
+                    userCountry !== "GHANA" ? "en-US" : "en-GH"
                   )}
                 </div>
               </div>
-              {userCountry === "USA" && (
+              {userCountry !== "GHANA" && (
                 <div className="flex justify-between mt-5">
                   <div>Shipping</div>
-                  <div>
-                    {formattedPrice(
-                      userCountry === "USA" ? shippingCost : shippingCost,
-                      userCountry === "USA" ? "USD" : "GHS",
-                      userCountry === "USA" ? "en-US" : "en-GH"
-                    )}
-                  </div>
+                  {shippingCost > 0 ? (
+                    <div>
+                      {formattedPrice(
+                        userCountry !== "GHANA" ? shippingCost : shippingCost,
+                        userCountry !== "GHANA" ? "USD" : "GHS",
+                        userCountry !== "GHANA" ? "en-US" : "en-GH"
+                      )}
+                    </div>
+                  ) : (
+                    <p>Shipping not available.</p>
+                  )}
                 </div>
               )}
 
@@ -444,11 +556,11 @@ const CheckoutPage = () => {
                 <div>Total</div>
                 <div className="text-2xl">
                   {formattedPrice(
-                    userCountry === "USA"
-                      ? calculatedTotalPrice + shippingCost
+                    userCountry !== "GHANA"
+                      ? totalCartDollarPrice + shippingCost
                       : calculatedTotalPrice,
-                    userCountry === "USA" ? "USD" : "GHS",
-                    userCountry === "USA" ? "en-US" : "en-GH"
+                    userCountry !== "GHANA" ? "USD" : "GHS",
+                    userCountry !== "GHANA" ? "en-US" : "en-GH"
                   )}
                 </div>
               </div>
@@ -456,7 +568,7 @@ const CheckoutPage = () => {
                 loading={paystackLoading || loading}
                 type="primary"
                 htmlType="submit"
-                disabled={isLoadingShippingCost}
+                disabled={isLoadingShippingCost || shippingCost === 0}
                 className="w-full mt-5 bg-red-500"
               >
                 {isLoadingShippingCost ? "Calculating..." : "Place Order"}

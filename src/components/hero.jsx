@@ -1,7 +1,7 @@
 const HeroSection = () => {
   return (
     <div className=" mb-20">
-      <img src="/hero-section.jpg" alt="hero" className="w-full" />
+      <img src="/hero-new.jpg" alt="hero" className="w-full bg-center" />
     </div>
   );
 };

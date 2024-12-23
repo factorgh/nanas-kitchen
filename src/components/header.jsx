@@ -1,19 +1,17 @@
 import { MenuOutlined } from "@ant-design/icons";
 import { Button, Divider, Drawer, Select } from "antd";
 import { useContext, useState } from "react";
-import { useDispatch } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { CountryContext } from "../context/country-context";
-import { clearCart } from "../store/slices/cartSlice";
 
 const Header = () => {
   const location = useLocation();
   const { Option } = Select;
 
-  const { userCountry, changeCountry } = useContext(CountryContext); // Use changeCountry
-  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const { userCountry, changeCountry } = useContext(CountryContext);
+  // const [dropdownVisible, setDropdownVisible] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false); // State for mobile menu
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   const links = [
     { name: "Home", href: "/" },
@@ -22,6 +20,9 @@ const Header = () => {
   ];
 
   const activeLink = links.find((link) => link.href === location.pathname);
+
+  // Handle default userCountry fallback
+  const currentCountry = userCountry || "USA";
 
   return (
     <div className="bg-[#AF1313] h-28">
@@ -55,22 +56,16 @@ const Header = () => {
             ))}
             <Divider type="vertical" className="h-10 bg-white" />
             <li>
-              {/* <Button
-                className="bg-white text-black rounded-md px-3"
-                onClick={() => setDropdownVisible((prev) => !prev)}
-              >
-                {userCountry || "Select Country"}
-              </Button> */}
-
               <Select
                 className="ml-3"
-                defaultValue={userCountry}
+                value={currentCountry}
                 style={{ width: 180 }}
                 onChange={(value) => {
                   // Clear the cart
-                  dispatch(clearCart());
+                  // dispatch(clearCart());
                   changeCountry(value);
-                }} // Use changeCountry here
+                  localStorage.setItem("userCountry", value);
+                }}
               >
                 <Option value="USA">USA</Option>
                 <Option value="GHANA">GHANA</Option>
@@ -80,7 +75,20 @@ const Header = () => {
         </div>
 
         {/* Mobile Menu Icon */}
-        <div className="lg:hidden">
+        <div className="lg:hidden flex gap-3 items-center">
+          <Select
+            className="ml-2 mt-1"
+            value={currentCountry}
+            style={{ width: 100, padding: "2px", fontSize: "14px" }} // Adjusted width, padding, and font size
+            onChange={(value) => {
+              changeCountry(value);
+              localStorage.setItem("userCountry", value);
+              setMenuOpen(false);
+            }}
+          >
+            <Option value="USA">USA</Option>
+            <Option value="GHANA">GHANA</Option>
+          </Select>
           <Button
             icon={<MenuOutlined />}
             className="text-white bg-transparent border-none text-xl"
@@ -105,27 +113,15 @@ const Header = () => {
             ))}
             <Divider />
             <li>
-              <Button
+              {/* <Button
                 className="bg-black text-white rounded-md px-3"
                 onClick={() => setDropdownVisible((prev) => !prev)}
               >
-                {userCountry || "Select Country"}
+                {currentCountry}
               </Button>
               {dropdownVisible && (
-                <Select
-                  className="ml-3 mt-2"
-                  defaultValue={userCountry}
-                  style={{ width: 180 }}
-                  onChange={(value) => {
-                    dispatch(clearCart());
-                    changeCountry(value);
-                    setMenuOpen(false);
-                  }} // Use changeCountry here
-                >
-                  <Option value="USA">USA</Option>
-                  <Option value="Ghana">GHANA</Option>
-                </Select>
-              )}
+                
+              )} */}
             </li>
           </ul>
         </Drawer>

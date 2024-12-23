@@ -6,25 +6,36 @@ const CountryContext = createContext();
 
 // Create the provider component
 export const CountryProvider = ({ children }) => {
-  const [userCountry, setUserCountry] = useState("USA");
-  useEffect(() => {
-    const fetchCountry = async () => {
-      try {
-        const response = await fetch("https://ipapi.co/json/");
-        const data = await response.json();
-        console.log(data);
-        setUserCountry(data.country_name);
-      } catch (error) {
-        console.error("Error fetching country data:", error);
-        setUserCountry("Unknown");
-      }
-    };
+  const [userCountry, setUserCountry] = useState(() => {
+    // Check localStorage for an existing country
+    const storedCountry = localStorage.getItem("userCountry");
+    return storedCountry ? storedCountry : "";
+  });
 
-    fetchCountry();
-  }, [setUserCountry]);
+  useEffect(() => {
+    if (!userCountry) {
+      const fetchCountry = async () => {
+        try {
+          const response = await fetch("https://ipapi.co/json/");
+          const data = await response.json();
+          const country = data.country_name.toUpperCase();
+          setUserCountry(country);
+          // Save to localStorage
+          localStorage.setItem("userCountry", country);
+        } catch (error) {
+          console.error("Error fetching country data:", error);
+          setUserCountry("Unknown");
+        }
+      };
+
+      fetchCountry();
+    }
+  }, [userCountry]);
 
   const changeCountry = (newCountry) => {
     setUserCountry(newCountry);
+    // Update localStorage
+    localStorage.setItem("userCountry", newCountry);
   };
 
   return (
@@ -35,5 +46,4 @@ export const CountryProvider = ({ children }) => {
 };
 
 // Custom hook to use the context
-
 export { CountryContext };

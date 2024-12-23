@@ -6,10 +6,12 @@ import {
 import {
   Button,
   Card,
+  Col,
   Drawer,
   Form,
   Input,
   message,
+  Row,
   Select,
   Table,
   Upload,
@@ -253,32 +255,40 @@ const Dashboard = () => {
   return (
     <div className="p-6 flex flex-col gap-3">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {/* Processing */}
-        <Card className="shadow-md" style={{ borderLeft: "5px solid #1890ff" }}>
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-md font-semibold">Processing Orders</h2>
-              <p className="text-gray-500 text-3xl">
-                {processingOrders?.length}
-              </p>
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12}>
+          <Card
+            className="shadow-md"
+            style={{ borderLeft: "5px solid #1890ff" }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-md font-semibold">Processing Orders</h2>
+                <p className="text-gray-500 text-3xl">
+                  {processingOrders?.length}
+                </p>
+              </div>
+              <Hourglass className="text-blue-500 w-8 h-8" />
             </div>
-            <Hourglass className="text-blue-500 w-8 h-8" />
-          </div>
-        </Card>
-        {/* Completed */}
-        <Card className="shadow-md" style={{ borderLeft: "5px solid #52c41a" }}>
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-md font-semibold">Completed Orders</h2>
-              <p className="text-gray-500 text-3xl">
-                {completedOrders?.length}
-              </p>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Card
+            className="shadow-md"
+            style={{ borderLeft: "5px solid #52c41a" }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-md font-semibold">Completed Orders</h2>
+                <p className="text-gray-500 text-3xl">
+                  {completedOrders?.length}
+                </p>
+              </div>
+              <CheckCircle className="text-green-500 w-8 h-8" />
             </div>
-            <CheckCircle className="text-green-500 w-8 h-8" />
-          </div>
-        </Card>
-      </div>
+          </Card>
+        </Col>
+      </Row>
 
       {/* Drawer Button */}
       <div className="flex justify-end">
@@ -292,23 +302,24 @@ const Dashboard = () => {
       </div>
 
       {/* Product Table */}
-      <Table
-        dataSource={productData}
-        columns={productColumns}
-        className="shadow-md"
-        pagination={{ pageSize: 5 }}
-      />
+      <div style={{ overflowX: "auto" }}>
+        <Table
+          dataSource={productData}
+          columns={productColumns}
+          pagination={{ pageSize: 10 }}
+        />
+      </div>
 
       {/* Drawer */}
       <Drawer
-        title={selected ? " Edit Product" : "Add New Product"}
+        title={selected ? "Edit Product" : "Add New Product"}
         placement="right"
         onClose={() => {
           setDrawerVisible(false);
-          form.resetFields(); // Reset form when Drawer closes
+          form.resetFields();
         }}
         open={drawerVisible}
-        width={400}
+        width={window.innerWidth < 768 ? "100%" : 400}
       >
         <Form ref={formRef} onFinish={onFinish} layout="vertical">
           <Form.Item
