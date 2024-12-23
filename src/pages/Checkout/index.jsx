@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Card,
   Checkbox,
@@ -14,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import CartItem from "../../components/cart-item";
 
+import { CloseSquareFilled } from "@ant-design/icons";
 import { useForm } from "antd/es/form/Form";
 import ProductCard from "../../components/product-card";
 import Wrapper from "../../components/wrapper";
@@ -60,6 +62,8 @@ const CheckoutPage = () => {
   const [isLoadingShippingCost, setIsLoadingShippingCost] = useState(false);
   const [savedDI, setSavedDI] = useState([]);
   const [savedCT, setSavedCT] = useState([]);
+  const [isShppingRateEmpty, setIsShppingRateEmpty] = useState(false);
+
   console.log(savedDI);
   console.log(savedCT);
 
@@ -103,6 +107,13 @@ const CheckoutPage = () => {
           "US",
           postalCode
         );
+        console.log("Shipping rate status");
+        console.log(cost);
+        if (cost === 0) {
+          setIsShppingRateEmpty(true);
+        } else {
+          setIsShppingRateEmpty(false);
+        }
         setShippingCost(cost);
       } catch (error) {
         console.error("Failed to update shipping cost:", error);
@@ -301,6 +312,9 @@ const CheckoutPage = () => {
     setShowModal(false);
   };
 
+  const onClose = (e) => {
+    console.log(e, "I was closed.");
+  };
   if (cartItems.length === 0) {
     return (
       <Wrapper>
@@ -501,10 +515,21 @@ const CheckoutPage = () => {
                     name="zip"
                   >
                     <Input
-                      onChange={(e) => setPostalCode(e.target.value)}
+                      onBlur={(e) => setPostalCode(e.target.value)}
                       placeholder="Enter your zip code"
                     />
                   </Form.Item>
+                  {isShppingRateEmpty && (
+                    <Alert
+                      message="Please enter a valid zip code to place order"
+                      type="error"
+                      closable={{
+                        "aria-label": "close",
+                        closeIcon: <CloseSquareFilled />,
+                      }}
+                      onClose={onClose}
+                    />
+                  )}
                 </Col>
               </Row>
               {userCountry === "GHANA" && (
