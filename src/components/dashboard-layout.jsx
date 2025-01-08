@@ -5,16 +5,20 @@ import {
 } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
 import { useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 
 const { Header, Sider, Content } = Layout;
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation(); // Get current route location
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
     window.location.reload();
   };
+
+  // Determine the selected menu key based on the current pathname
+  const selectedKey = location.pathname.includes("orders") ? "2" : "1";
 
   return (
     <Layout className="h-screen">
@@ -31,7 +35,7 @@ const DashboardLayout = () => {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={["1"]}
+          selectedKeys={[selectedKey]} // Dynamically set the selected key
           className="bg-gray-900"
         >
           <Menu.Item key="1" icon={<DashboardOutlined />}>

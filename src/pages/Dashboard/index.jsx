@@ -159,6 +159,7 @@ const Dashboard = () => {
 
   const handleEdit = (record) => {
     setSelected(record);
+    setImagePreview(record.image);
     setDrawerVisible(true);
   };
 
@@ -326,7 +327,7 @@ const Dashboard = () => {
           form.resetFields();
         }}
         open={drawerVisible}
-        width={window.innerWidth < 768 ? "100%" : 400}
+        width={window.innerWidth < 768 ? "100%" : 600}
       >
         <Form ref={formRef} onFinish={onFinish} layout="vertical">
           <Form.Item
@@ -447,6 +448,7 @@ const Dashboard = () => {
 
           {/* Submit Button with Loading Indicator */}
           <Button
+            className="w-full "
             type="primary"
             htmlType="submit"
             loading={loading} // Show the loading spinner when form is submitting

@@ -32,7 +32,7 @@ const Header = () => {
           <img
             src="/nana-logo.png"
             alt="nana-logo"
-            className="md:h-20 md:w-48 my-5 h-15 w-32"
+            className="md:h-16 md:w-28 my-5 h-15 w-32"
           />
         </Link>
 
