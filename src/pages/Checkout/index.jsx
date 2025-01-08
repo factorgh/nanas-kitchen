@@ -14,12 +14,13 @@ import {
 import { MapPin } from "lucide-react";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CartItem from "../../components/cart-item";
 import manualLocations from "../../utils/manual-locations";
 
 import { CloseSquareFilled } from "@ant-design/icons";
 import { useForm } from "antd/es/form/Form";
+import EmptyCart from "../../components/empty-cart";
 import ProductCard from "../../components/product-card";
 import Wrapper from "../../components/wrapper";
 import { CountryContext } from "../../context/country-context";
@@ -39,6 +40,7 @@ import {
 } from "../../store/slices/dollarSlice";
 import { formatCurrency } from "../../utils/currency-formatter";
 import { deriveDeliveryRate } from "../../utils/delivery-fee";
+import { deriveLocationsChoord } from "../../utils/locations-choord";
 import { handlePayStackPayment } from "../../utils/paystack-handler";
 import {
   calculateDimensions,
@@ -465,14 +467,7 @@ const CheckoutPage = () => {
                 }}
                 className="flex flex-col  justify-center items-center"
               >
-                <h3 className="text-3xl font-bold mb-5 text-center">
-                  Ooooops !!! Cart is empty
-                  <Link to="/">
-                    <button className="w-full mt-5 bg-red-500 text-white py-2 rounded-md text-sm">
-                      Order Again
-                    </button>
-                  </Link>
-                </h3>
+                <EmptyCart />
               </Card>
             </div>
           </div>
@@ -484,18 +479,19 @@ const CheckoutPage = () => {
   const handleLocationChange = (value) => {
     setConvertedAddress(value);
 
-    // const str = deriveLocationsChoord(value);
-    // console.log(
-    //   "----------------------------------------------------------------Updated location---------------"
-    // );
-    // console.log(str);
-    // const [latitude, longitude] = str.split(",");
-
-    // setCoLocation((prev) => ({
-    //   ...prev,
-    //   lat: latitude,
-    //   lng: longitude,
-    // }));
+    if (!isGeoEnabled) {
+      const str = deriveLocationsChoord(value);
+      console.log(
+        "----------------------------------------------------------------Updated location---------------"
+      );
+      console.log(str);
+      const [latitude, longitude] = str.split(",");
+      setCoLocation((prev) => ({
+        ...prev,
+        lat: latitude,
+        lng: longitude,
+      }));
+    }
     form.setFieldsValue({ location: value });
     const deliverycost = deriveDeliveryRate(value);
     setDeliveryFee(deliverycost);
@@ -663,118 +659,124 @@ const CheckoutPage = () => {
                     <Input placeholder="Enter your state or city" />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
-                  <Form.Item
-                    rules={[
-                      { required: true, message: "This field is required" },
-                    ]}
-                    label="Zip/Postal Code"
-                    name="zip"
-                  >
-                    <Input
-                      onInput={(e) => setPostalCode(e.target.value)} // Capture autofill
-                      onBlur={(e) => setPostalCode(e.target.value)} // Fallback for unfocus
-                      placeholder="Enter your zip code"
-                    />
-                  </Form.Item>
-                  {isShppingRateEmpty && (
-                    <Alert
-                      message="Please enter a valid zip code to place order"
-                      type="error"
-                      closable={{
-                        "aria-label": "close",
-                        closeIcon: <CloseSquareFilled />,
-                      }}
-                      onClose={onClose}
-                    />
-                  )}
-                </Col>
+                {userCountry !== "GHANA" && (
+                  <Col span={12}>
+                    <Form.Item
+                      rules={[
+                        { required: true, message: "This field is required" },
+                      ]}
+                      label="Zip/Postal Code"
+                      name="zip"
+                    >
+                      <Input
+                        onInput={(e) => setPostalCode(e.target.value)} // Capture autofill
+                        onBlur={(e) => setPostalCode(e.target.value)} // Fallback for unfocus
+                        placeholder="Enter your zip code"
+                      />
+                    </Form.Item>
+                    {isShppingRateEmpty && (
+                      <Alert
+                        message="Please enter a valid zip code to place order"
+                        type="error"
+                        closable={{
+                          "aria-label": "close",
+                          closeIcon: <CloseSquareFilled />,
+                        }}
+                        onClose={onClose}
+                      />
+                    )}
+                  </Col>
+                )}
               </Row>
 
               <h4 className="text-xl font-bold mb-5 mt-5">Location</h4>
               {userCountry === "GHANA" && (
-                <>
+                <div
+                  style={{
+                    padding: "16px",
+                    backgroundColor: "#f9f9f9",
+                    borderRadius: "8px",
+                  }}
+                >
+                  {/* Form for Manual Location Selection */}
                   <Form.Item
                     name="location"
-                    label="Select Manual Location"
+                    label="Select Location"
                     rules={[
                       { required: true, message: "Please select a location!" },
                     ]}
                   >
                     <Select
-                      // disabled={!!isGeoEnabled}
-                      showSearch // Enables search functionality
+                      showSearch
                       placeholder="Choose a location"
                       style={{ width: "100%" }}
                       onChange={(e) => handleLocationChange(e)}
                       options={manualLocations.map((location) => ({
-                        label: `${location.name}`, // Display name
-                        value: location.name, // Value for selection
+                        label: `${location.name}`,
+                        value: location.name,
                       }))}
                       filterOption={(input, option) =>
                         (option?.label ?? "")
                           .toLowerCase()
                           .includes(input.toLowerCase())
-                      } // Case-insensitive search
+                      }
                     />
                   </Form.Item>
-                  {/* Location Checkbox */}
+
+                  {/* Location Selection Checkbox */}
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "12px",
-                      marginBottom: "8px",
-                      // justifyContent: "center", // Center-align the entire row
+                      gap: "16px",
+                      marginBottom: "16px",
+                      padding: "12px",
+                      backgroundColor: "#ffffff",
+                      borderRadius: "8px",
+                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                     }}
                   >
-                    {/* Checkbox for enabling location */}
-                    <Form.Item style={{ margin: 0 }}>
-                      <Checkbox
-                        checked={isGeoEnabled}
-                        onChange={handleCheckboxChange}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          flexDirection: "row",
-                          justifyContent: "center",
-                          gap: "8px",
-                          marginBottom: "20px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                          }}
-                        >
-                          {" "}
-                          <MapPin size={16} color="#007bff" />
-                          Pin your location for delivery
-                        </div>
-                      </Checkbox>
-                    </Form.Item>
-
-                    {/* Display current location */}
-                    {/* {isGeoEnabled && currentLocation && (
-                      <span
+                    <Checkbox
+                      checked={isGeoEnabled}
+                      onChange={handleCheckboxChange}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <div
                         style={{
                           display: "flex",
                           alignItems: "center",
                           gap: "8px",
-                          fontSize: "14px",
-                          color: "#000", // Adjust color if needed
                         }}
                       >
                         <MapPin size={16} color="#007bff" />
-                        {convertedAddress}
-                      </span>
-                    )} */}
+                        Pin your location for easy delivery
+                      </div>
+                    </Checkbox>
                   </div>
 
-                  {/* Display Current Location */}
-                </>
+                  {/* Optional Display for Current Location */}
+                  {/* {isGeoEnabled && (
+                    <div
+                      style={{
+                        marginTop: "16px",
+                        padding: "12px",
+                        backgroundColor: "#e6f7ff",
+                        borderRadius: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        color: "#0056b3",
+                      }}
+                    >
+                      <MapPin size={16} color="#0056b3" />
+                      Current Location Enabled
+                    </div>
+                  )} */}
+                </div>
               )}
               {userCountry === "GHANA" && (
                 <Row>
