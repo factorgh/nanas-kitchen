@@ -71,6 +71,10 @@ const handlePaymentVerification = async (
   orderId
   // handleRedirect
 ) => {
+  console.log("----------------------------------------Order: " + orderId);
+  console.log(
+    "----------------------------------------Reference: " + reference
+  );
   try {
     const response = await axios.post(`${API_URL}/paystack/verify`, {
       reference,

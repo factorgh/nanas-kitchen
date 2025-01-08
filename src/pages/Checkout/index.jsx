@@ -209,6 +209,7 @@ const CheckoutPage = () => {
       ...values,
       country: countryCode,
       location: formattedLocation,
+      zip: userCountry === "GHANA" ? "35006" : values.zip,
     };
 
     console.log("Form values after processing:", updatedValues);
