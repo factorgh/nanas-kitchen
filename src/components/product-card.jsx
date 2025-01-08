@@ -22,19 +22,19 @@ const ProductCard = ({ product, handleAddToCart }) => {
       className="flex flex-col items-center"
     >
       {/* Image */}
-      <div className="flex justify-end w-full">
+      <div className="flex justify-end w-full ">
         <div className="w-12 h-12 bg-[#FFE2C7] flex items-center justify-center rounded-3xl text-end">
           Sale!
         </div>
       </div>
-      <img src={product.image} alt={product.title} />
+      <img className="w-52 h-52" src={product.image} alt={product.title} />
       {/* Title */}
       <h3 className="text-2xl font-bold">{product.title}</h3>
       {/* Price */}
       <p>
         <span className="line-through mr-2 text-lg">
           {formattedPrice(
-            userCountry === "GHANA" ? product.dollarPrice : product.cediPrice,
+            userCountry === "GHANA" ? product.cediPrice : product.dollarPrice,
             userCountry === "GHANA" ? "GHS" : "USD",
             userCountry === "GHANA" ? "en-GH" : "en-US"
           )}
@@ -42,8 +42,9 @@ const ProductCard = ({ product, handleAddToCart }) => {
         <span className="text-lg">
           {formattedPrice(
             userCountry === "GHANA"
-              ? product.dollarDiscount
-              : product.cediDiscount,
+              ? product.cediDiscount
+              : product.dollarDiscount,
+
             userCountry === "GHANA" ? "GHS" : "USD",
             userCountry === "GHANA" ? "en-GH" : "en-US"
           )}

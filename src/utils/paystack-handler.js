@@ -42,13 +42,10 @@ export const handlePayStackPayment = async (
         if (response.status === "success") {
           // Handle successful payment
           console.log("Payment successful:", response);
+          handleRedirect();
 
           // Call the asynchronous function outside of the callback to verify the payment
-          handlePaymentVerification(
-            response.reference,
-            data.data.orderId,
-            handleRedirect
-          );
+          handlePaymentVerification(response.reference, data.data.orderId);
         } else {
           alert("Payment was not successful");
         }
@@ -71,8 +68,8 @@ export const handlePayStackPayment = async (
 // Function to handle payment verification asynchronously
 const handlePaymentVerification = async (
   reference,
-  orderId,
-  handleRedirect
+  orderId
+  // handleRedirect
 ) => {
   try {
     const response = await axios.post(`${API_URL}/paystack/verify`, {
@@ -83,7 +80,7 @@ const handlePaymentVerification = async (
     // Handle the verification response
     if (response.data.data.status === "success") {
       message.success("Payment verification successful!");
-      handleRedirect();
+      // handleRedirect();
     } else {
       message.error("Payment verification failed.");
     }

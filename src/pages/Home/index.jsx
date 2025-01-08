@@ -57,6 +57,7 @@ const HomePage = () => {
 
     // Navigate to check out page
     navigate("/checkout");
+    window.scrollTo(0, 0); //
   };
   const handleDollarAddToCart = (product) => {
     dispatch(clearDollarCart());
@@ -79,6 +80,7 @@ const HomePage = () => {
 
     // Navigate to check out page
     navigate("/checkout");
+    window.scrollTo(0, 0); //
   };
 
   const heroRef = useRef(null);
@@ -132,18 +134,26 @@ const HomePage = () => {
         transition={{ duration: 0.8, ease: "circInOut" }}
         className="container mx-auto px-4 md:px-8 lg:px-16 mb-10 mt-10"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {products.map((product) => (
-            <ProductCard
-              handleAddToCart={() => {
-                handleAddToCart(product);
-                handleDollarAddToCart(product);
-              }}
-              key={product._id}
-              product={product}
-            />
-          ))}
-        </div>
+        {products.length === 0 ? (
+          <div className="">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-center">
+              No products available
+            </h1>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {products.map((product) => (
+              <ProductCard
+                handleAddToCart={() => {
+                  handleAddToCart(product);
+                  handleDollarAddToCart(product);
+                }}
+                key={product._id}
+                product={product}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Recipe Section */}
         <div className="flex flex-col lg:flex-row items-center justify-center gap-10 mt-20 px-4">
@@ -153,7 +163,7 @@ const HomePage = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={gridInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, ease: "circInOut" }}
-            className="flex flex-col gap-4 items-center lg:items-end"
+            className="flex flex-col gap-4 items-center lg:items-end mt-10"
           >
             <img
               src="/recipe-1.jpeg"
@@ -168,7 +178,7 @@ const HomePage = () => {
           </motion.div>
 
           {/* Second Section (Card) */}
-          <div className="flex items-center justify-center ">
+          <div className="flex items-center justify-center mt-10">
             <Card className="flex flex-col gap-4 items-center justify-center px-8 md:px-16 py-10 shadow-xl w-full max-w-lg lg:h-[600px] rounded-tr-[50px] rounded-tl-[50px]">
               <h3
                 style={{

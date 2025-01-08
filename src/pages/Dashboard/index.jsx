@@ -36,6 +36,13 @@ const Dashboard = () => {
   const [orders, setOrders] = useState([]);
   const [selected, setSelected] = useState(null);
   const formRef = useRef();
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const handleBeforeUpload = (file) => {
+    const url = URL.createObjectURL(file);
+    setImagePreview(url); // Generate preview URL
+    return false; // Prevent auto-upload
+  };
 
   useEffect(() => {
     const getProducts = async () => {
@@ -344,7 +351,7 @@ const Dashboard = () => {
             <Input type="number" placeholder="Enter product price" />
           </Form.Item>
           <Form.Item
-            label="Dollar Discount"
+            label="Dollar Discount Price"
             name="dollarDiscount"
             rules={[
               { required: true, message: "Please enter dollar discount" },
@@ -353,7 +360,7 @@ const Dashboard = () => {
             <Input type="number" placeholder="Enter product dollar discount" />
           </Form.Item>
           <Form.Item
-            label="Cedi Discount"
+            label="Cedi Discount Price"
             name="cediDiscount"
             rules={[{ required: true, message: "Please enter cedi discount" }]}
           >
@@ -413,6 +420,7 @@ const Dashboard = () => {
                   message.error("You can only upload PNG or JPEG images!");
                   return false; // stop the upload
                 }
+                handleBeforeUpload(file);
                 const isSmallEnough = file.size / 1024 / 1024 < 2; // 2MB
                 if (!isSmallEnough) {
                   message.error("Image must be smaller than 2MB!");
@@ -426,6 +434,15 @@ const Dashboard = () => {
             >
               <Button icon={<UploadOutlined />}>Upload Asset Image</Button>
             </Upload>
+            {imagePreview && (
+              <div style={{ marginTop: 16 }}>
+                <img
+                  src={imagePreview}
+                  alt="Selected"
+                  style={{ width: "100%", height: "auto", borderRadius: "8px" }}
+                />
+              </div>
+            )}
           </Form.Item>
 
           {/* Submit Button with Loading Indicator */}

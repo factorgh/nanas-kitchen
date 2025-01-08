@@ -1,4 +1,5 @@
-import { Table, Tag } from "antd";
+import { notification, Table, Tag } from "antd";
+import { Copy } from "lucide-react";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { getAllOrders } from "../../services/order-service";
@@ -17,6 +18,10 @@ const Orders = () => {
     setLoading(true);
     try {
       const response = await getAllOrders();
+      console.log(
+        "-----------------------All Orders---------------------------",
+        response
+      );
       const formattedOrders = response?.map((order) => ({
         ...order,
         key: order._id,
@@ -75,8 +80,57 @@ const Orders = () => {
       title: "Total Amount",
       dataIndex: "totalAmount",
       key: "totalAmount",
-      render: (total) => `$${total.toFixed(2)}`,
+      render: (total, record) => {
+        const country = record.userDetails?.country; // Access country from userDetails
+        let formattedTotal;
+
+        switch (country) {
+          case "GH":
+            formattedTotal = `₵${total.toFixed(2)}`; // Ghanaian Cedi
+            break;
+          case "USD":
+            formattedTotal = `$${total.toFixed(2)}`; // US Dollar
+            break;
+          default:
+            formattedTotal = `$${total.toFixed(2)}`; // Default currency
+        }
+
+        return formattedTotal;
+      },
     },
+
+    {
+      title: "Location",
+      dataIndex: "location",
+      key: "location",
+      render: (_, record) => {
+        const location = record.userDetails?.location;
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(location || "");
+                notification.success({
+                  message: "Copied to Clipboard",
+                  // description: `Location "${location}" has been copied.`,
+                });
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+              }}
+              title="Copy Location"
+            >
+              <Copy size={16} color="#007bff" />
+            </button>
+          </div>
+        );
+      },
+    },
+
     {
       title: "Order Date",
       dataIndex: "orderDate",

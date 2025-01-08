@@ -9,11 +9,14 @@ import {
   message,
   Modal,
   Row,
+  Select,
 } from "antd";
+import { MapPin } from "lucide-react";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import CartItem from "../../components/cart-item";
+import manualLocations from "../../utils/manual-locations";
 
 import { CloseSquareFilled } from "@ant-design/icons";
 import { useForm } from "antd/es/form/Form";
@@ -35,6 +38,7 @@ import {
   clearDollarCart,
 } from "../../store/slices/dollarSlice";
 import { formatCurrency } from "../../utils/currency-formatter";
+import { deriveDeliveryRate } from "../../utils/delivery-fee";
 import { handlePayStackPayment } from "../../utils/paystack-handler";
 import {
   calculateDimensions,
@@ -46,7 +50,12 @@ const CheckoutPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const { userCountry } = useContext(CountryContext);
-  const naivigate = useNavigate();
+  const [coLocation, setCoLocation] = useState({
+    lat: null,
+    lng: null,
+  });
+  const [convertedAddress, setConvertedAddress] = useState("");
+  const navigate = useNavigate();
 
   console.log(userCountry);
   const dispatch = useDispatch();
@@ -63,6 +72,10 @@ const CheckoutPage = () => {
   const [savedDI, setSavedDI] = useState([]);
   const [savedCT, setSavedCT] = useState([]);
   const [isShppingRateEmpty, setIsShppingRateEmpty] = useState(false);
+  const [isGeoEnabled, setIsGeoEnabled] = useState(false);
+
+  const [currentLocation, setCurrentLocation] = useState("");
+  const [deliveryFee, setDeliveryFee] = useState(0);
 
   console.log(savedDI);
   console.log(savedCT);
@@ -117,7 +130,7 @@ const CheckoutPage = () => {
         setShippingCost(cost);
       } catch (error) {
         console.error("Failed to update shipping cost:", error);
-        setShippingCost(0); // Reset to zero on error
+        setShippingCost(0);
       } finally {
         setIsLoadingShippingCost(false); // End loading state
       }
@@ -177,7 +190,9 @@ const CheckoutPage = () => {
   const protectivePackageCost = 30;
 
   const calculatedTotalPrice =
-    totalCartPrice + (protectivePackage ? protectivePackageCost : 0);
+    totalCartPrice +
+    (protectivePackage ? protectivePackageCost : 0) +
+    deliveryFee;
 
   const handleProtectivePackageChange = (checked) => {
     setIsProtectivePackage(checked);
@@ -185,10 +200,13 @@ const CheckoutPage = () => {
 
   // Hnadle Form submit
   const onFinish = async (values) => {
+    if (isShppingRateEmpty) return;
     const countryCode = mapCountryToCode(userCountry);
+    const formattedLocation = `https://www.google.com/maps?q=${coLocation.lat},${coLocation.lng}`;
     const updatedValues = {
       ...values,
       country: countryCode,
+      location: formattedLocation,
     };
 
     console.log("Form values after processing:", updatedValues);
@@ -211,10 +229,15 @@ const CheckoutPage = () => {
   };
 
   const handleRedirect = () => {
-    naivigate("/success");
-    message.success("Payment successful! Redirecting to home page...");
-  };
+    // Ensure useNavigate is used inside a React component
+    navigate("/success");
+    // message.success("Payment successful! Redirecting to home page...");
 
+    // Redirect to the home page after 3 seconds
+    setTimeout(() => {
+      navigate("/");
+    }, 3000); // 3000 milliseconds = 3 seconds
+  };
   //Calculate total price
 
   console.log(totalCartPrice);
@@ -274,6 +297,120 @@ const CheckoutPage = () => {
       ))}
     </div>
   );
+
+  // Handle geolocation retrieval
+  // const handleGeolocation = () => {
+  //   if (navigator.geolocation) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         const { latitude, longitude } = position.coords;
+  //         const locationString = `Lat: ${latitude}, Lng: ${longitude}`;
+
+  //         // Set geolocation as form value
+  //         form.setFieldsValue({ location: locationString });
+  //         notification.success({ message: "Location set successfully!" });
+  //       },
+  //       (error) => {
+  //         notification.error({
+  //           message: "Error getting location",
+  //           description: error.message,
+  //         });
+  //       }
+  //     );
+  //   } else {
+  //     notification.error({
+  //       message: "Geolocation not supported",
+  //       description: "Your browser does not support geolocation.",
+  //     });
+  //   }
+  // };
+
+  // Handle geolocation retrieval
+  // const handleGeolocation = () => {
+  //   if (navigator.geolocation) {
+  //     setLoading(false);
+  //     navigator.geolocation.getCurrentPosition(
+  //       async (position) => {
+  //         const { latitude, longitude } = position.coords;
+  //         console.log(
+  //           "-------------------------------------Postion on google maps",
+  //           latitude,
+  //           longitude
+  //         );
+
+  //         // Update the location state
+  //         setCoLocation((prev) => ({
+  //           ...prev,
+  //           lat: latitude,
+  //           lng: longitude,
+  //         }));
+  //         try {
+  //           const address = await getHumanReadableLocation(latitude, longitude);
+  //           const deliverycost = deriveDeliveryRate(address);
+  //           setDeliveryFee(deliverycost);
+
+  //           // form.setFieldsValue({ location: address });
+  //           setConvertedAddress(address);
+  //           // notification.success({ message: "Location set successfully!" });
+  //         } catch (error) {
+  //           console.log(error);
+  //           // Already handled in getHumanReadableLocation
+  //         } finally {
+  //           setLoading(false);
+  //         }
+  //       },
+  //       (error) => {
+  //         setLoading(false);
+  //         notification.error({
+  //           message: "Error getting location",
+  //           description: error.message,
+  //         });
+  //       }
+  //     );
+  //   } else {
+  //     notification.error({
+  //       message: "Geolocation not supported",
+  //       description: "Your browser does not support geolocation.",
+  //     });
+  //   }
+  // };
+
+  const handleCheckboxChange = (e) => {
+    const checked = e.target.checked;
+    setIsGeoEnabled(checked);
+    // setDeliveryFee(0);
+
+    if (checked) {
+      // Simulate fetching the user's current location
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+
+          console.log(
+            "-------------------------------------Postion on google maps",
+            latitude,
+            longitude
+          );
+          setCoLocation((prev) => ({
+            ...prev,
+            lat: latitude,
+            lng: longitude,
+          }));
+          // form.resetFields(["location"]);
+          // form.setFieldsValue({ location: "" });
+          const location = `Latitude: ${latitude}, Longitude: ${longitude}`;
+          setCurrentLocation(location);
+        },
+        (error) => {
+          form.resetFields(["location"]);
+          console.error("Error fetching location:", error);
+          setCurrentLocation("Unable to fetch location.");
+        }
+      );
+    } else {
+      setCurrentLocation("");
+    }
+  };
 
   // handle add to cart
   const handleAddToCart = (product) => {
@@ -344,6 +481,26 @@ const CheckoutPage = () => {
     );
   }
 
+  const handleLocationChange = (value) => {
+    setConvertedAddress(value);
+
+    // const str = deriveLocationsChoord(value);
+    // console.log(
+    //   "----------------------------------------------------------------Updated location---------------"
+    // );
+    // console.log(str);
+    // const [latitude, longitude] = str.split(",");
+
+    // setCoLocation((prev) => ({
+    //   ...prev,
+    //   lat: latitude,
+    //   lng: longitude,
+    // }));
+    form.setFieldsValue({ location: value });
+    const deliverycost = deriveDeliveryRate(value);
+    setDeliveryFee(deliverycost);
+    console.log(deliverycost);
+  };
   // Add total price calculation logic here
   const calculateStripeTotal = totalCartDollarPrice + shippingCost;
   console.log(
@@ -515,7 +672,8 @@ const CheckoutPage = () => {
                     name="zip"
                   >
                     <Input
-                      onBlur={(e) => setPostalCode(e.target.value)}
+                      onInput={(e) => setPostalCode(e.target.value)} // Capture autofill
+                      onBlur={(e) => setPostalCode(e.target.value)} // Fallback for unfocus
                       placeholder="Enter your zip code"
                     />
                   </Form.Item>
@@ -532,6 +690,92 @@ const CheckoutPage = () => {
                   )}
                 </Col>
               </Row>
+
+              <h4 className="text-xl font-bold mb-5 mt-5">Location</h4>
+              {userCountry === "GHANA" && (
+                <>
+                  <Form.Item
+                    name="location"
+                    label="Select Manual Location"
+                    rules={[
+                      { required: true, message: "Please select a location!" },
+                    ]}
+                  >
+                    <Select
+                      // disabled={!!isGeoEnabled}
+                      showSearch // Enables search functionality
+                      placeholder="Choose a location"
+                      style={{ width: "100%" }}
+                      onChange={(e) => handleLocationChange(e)}
+                      options={manualLocations.map((location) => ({
+                        label: `${location.name}`, // Display name
+                        value: location.name, // Value for selection
+                      }))}
+                      filterOption={(input, option) =>
+                        (option?.label ?? "")
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      } // Case-insensitive search
+                    />
+                  </Form.Item>
+                  {/* Location Checkbox */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      marginBottom: "8px",
+                      // justifyContent: "center", // Center-align the entire row
+                    }}
+                  >
+                    {/* Checkbox for enabling location */}
+                    <Form.Item style={{ margin: 0 }}>
+                      <Checkbox
+                        checked={isGeoEnabled}
+                        onChange={handleCheckboxChange}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          flexDirection: "row",
+                          justifyContent: "center",
+                          gap: "8px",
+                          marginBottom: "20px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          {" "}
+                          <MapPin size={16} color="#007bff" />
+                          Pin your location for delivery
+                        </div>
+                      </Checkbox>
+                    </Form.Item>
+
+                    {/* Display current location */}
+                    {/* {isGeoEnabled && currentLocation && (
+                      <span
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          fontSize: "14px",
+                          color: "#000", // Adjust color if needed
+                        }}
+                      >
+                        <MapPin size={16} color="#007bff" />
+                        {convertedAddress}
+                      </span>
+                    )} */}
+                  </div>
+
+                  {/* Display Current Location */}
+                </>
+              )}
               {userCountry === "GHANA" && (
                 <Row>
                   <Form.Item label="">
@@ -560,6 +804,19 @@ const CheckoutPage = () => {
                   )}
                 </div>
               </div>
+              {userCountry === "GHANA" && (
+                <div className="flex justify-between mt-5">
+                  <div>Delivery Fee</div>
+                  <div>
+                    {" "}
+                    {formattedPrice(
+                      deliveryFee,
+                      userCountry !== "GHANA" ? "USD" : "GHS",
+                      userCountry !== "GHANA" ? "en-US" : "en-GH"
+                    )}
+                  </div>
+                </div>
+              )}
               {userCountry !== "GHANA" && (
                 <div className="flex justify-between mt-5">
                   <div>Shipping</div>

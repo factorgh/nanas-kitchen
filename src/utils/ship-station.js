@@ -1,4 +1,3 @@
-import { message } from "antd";
 import axios from "axios";
 import { Buffer } from "buffer";
 
@@ -58,7 +57,7 @@ export const fetchShippingRate = async (
     const rates = response.data;
     return rates.length > 0 ? rates[0].shipmentCost : 0;
   } catch (error) {
-    message.error("Zip code is not a valid.Please try again");
+    // message.error("Zip code is not a valid.Please try again");
     console.error("Error fetching shipping rates:", error);
     throw error;
   }
