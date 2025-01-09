@@ -28,7 +28,7 @@ export const handlePayStackPayment = async (
       email: userDetails.email,
       amount: totalPrice * 100,
       currency: "GHS",
-      reference: `NanasKitchen-${data.data.orderId}`,
+      // reference: `NanasKitchen-${data.data.orderId}`,
       metadata: {
         customerName: userDetails.name,
         customerPhone: userDetails.phone,
@@ -44,6 +44,10 @@ export const handlePayStackPayment = async (
           console.log("Payment successful:", response);
           handleRedirect();
 
+          console.log(
+            "----------------------------------------------------Response referece, ",
+            response
+          );
           // Call the asynchronous function outside of the callback to verify the payment
           handlePaymentVerification(response.reference, data.data.orderId);
         } else {

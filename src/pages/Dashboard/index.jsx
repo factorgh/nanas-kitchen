@@ -16,7 +16,7 @@ import {
   Table,
   Upload,
 } from "antd";
-import { CheckCircle, Hourglass } from "lucide-react"; // Specific icons from Lucide React
+import { DollarSign, Wallet } from "lucide-react"; // Specific icons from Lucide React
 import { useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import { getAllOrders } from "../../services/order-service";
@@ -37,6 +37,14 @@ const Dashboard = () => {
   const [selected, setSelected] = useState(null);
   const formRef = useRef();
   const [imagePreview, setImagePreview] = useState(null);
+
+  // Orders summary
+  const ghanaOrders = orders
+    .filter((order) => order.userDetails.country === "GH")
+    .filter((order) => order.status === "completed").length;
+  const usdOrders = orders
+    .filter((order) => order.userDetails.country === "US")
+    .filter((order) => order.status === "completed").length;
 
   const handleBeforeUpload = (file) => {
     const url = URL.createObjectURL(file);
@@ -254,45 +262,59 @@ const Dashboard = () => {
     },
   ];
 
-  const processingOrders = orders.filter(
-    (record) => record.status === "processing"
-  );
-  const completedOrders = orders.filter(
-    (record) => record.status === "completed"
-  );
+  // const processingOrders = orders.filter(
+  //   (record) => record.status === "processing"
+  // );
+  // const completedOrders = orders.filter(
+  //   (record) => record.status === "completed"
+  // );
   return (
     <div className="p-6 flex flex-col gap-3">
       {/* Summary Cards */}
       <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12}>
+        <Col xs={24} sm={12} md={8} lg={8}>
           <Card
             className="shadow-md"
             style={{ borderLeft: "5px solid #1890ff" }}
           >
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-md font-semibold">Processing Orders</h2>
-                <p className="text-gray-500 text-3xl">
-                  {processingOrders?.length}
-                </p>
+                <h2 className="text-md font-semibold">USA Orders</h2>
+                <p className="text-gray-500 text-3xl">{usdOrders}</p>
               </div>
-              <Hourglass className="text-blue-500 w-8 h-8" />
+              <DollarSign className="text-[#1890ff]" />
             </div>
           </Card>
         </Col>
-        <Col xs={24} sm={12}>
+
+        <Col xs={24} sm={12} md={8} lg={8}>
           <Card
             className="shadow-md"
             style={{ borderLeft: "5px solid #52c41a" }}
           >
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-md font-semibold">Completed Orders</h2>
+                <h2 className="text-md font-semibold">Ghana Orders</h2>
+                <p className="text-gray-500 text-3xl">{ghanaOrders}</p>
+              </div>
+              <span className="text-green-500 text-3xl">₵</span>
+            </div>
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={12} md={8} lg={8}>
+          <Card
+            className="shadow-md"
+            style={{ borderLeft: "5px solid #52c41a" }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-md font-semibold">Total Orders</h2>
                 <p className="text-gray-500 text-3xl">
-                  {completedOrders?.length}
+                  {ghanaOrders + usdOrders}
                 </p>
               </div>
-              <CheckCircle className="text-green-500 w-8 h-8" />
+              <Wallet className="text-green-500" />
             </div>
           </Card>
         </Col>

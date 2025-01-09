@@ -1,13 +1,18 @@
-import { notification, Table, Tag } from "antd";
+import { notification, Select, Table, Tag } from "antd";
 import { Copy } from "lucide-react";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { getAllOrders } from "../../services/order-service";
 
+const { Option } = Select;
+
 const Orders = () => {
   const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState("all");
+
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -18,15 +23,12 @@ const Orders = () => {
     setLoading(true);
     try {
       const response = await getAllOrders();
-      console.log(
-        "-----------------------All Orders---------------------------",
-        response
-      );
       const formattedOrders = response?.map((order) => ({
         ...order,
         key: order._id,
       }));
       setOrders(formattedOrders);
+      setFilteredOrders(formattedOrders); // Initialize filtered orders
       setPagination((prev) => ({
         ...prev,
         total: formattedOrders.length,
@@ -43,21 +45,27 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
-  const handleTableChange = (pagination, filters) => {
-    setPagination({
-      ...pagination,
-    });
+  const handleCountryChange = (value) => {
+    setSelectedCountry(value);
 
-    if (filters.status && filters.status.length > 0) {
-      // Apply filtering based on the selected filter
-      const filtered = filters.status.includes("all")
-        ? orders
-        : orders.filter((order) => filters.status.includes(order.status));
-      setPagination((prev) => ({
-        ...prev,
-        total: filtered.length,
-      }));
+    if (value === "all") {
+      setFilteredOrders(orders);
+    } else {
+      const filtered = orders.filter(
+        (order) => order.userDetails?.country === value
+      );
+      setFilteredOrders(filtered);
     }
+
+    // Update pagination
+    setPagination((prev) => ({
+      ...prev,
+      total:
+        value === "all"
+          ? orders.length
+          : orders.filter((order) => order.userDetails?.country === value)
+              .length,
+    }));
   };
 
   const columns = [
@@ -81,24 +89,12 @@ const Orders = () => {
       dataIndex: "totalAmount",
       key: "totalAmount",
       render: (total, record) => {
-        const country = record.userDetails?.country; // Access country from userDetails
-        let formattedTotal;
-
-        switch (country) {
-          case "GH":
-            formattedTotal = `₵${total.toFixed(2)}`; // Ghanaian Cedi
-            break;
-          case "USD":
-            formattedTotal = `$${total.toFixed(2)}`; // US Dollar
-            break;
-          default:
-            formattedTotal = `$${total.toFixed(2)}`; // Default currency
-        }
-
-        return formattedTotal;
+        const country = record.userDetails?.country;
+        return country === "GH"
+          ? `₵${total.toFixed(2)}`
+          : `$${total.toFixed(2)}`;
       },
     },
-
     {
       title: "Location",
       dataIndex: "location",
@@ -113,7 +109,6 @@ const Orders = () => {
                 navigator.clipboard.writeText(location || "");
                 notification.success({
                   message: "Copied to Clipboard",
-                  // description: `Location "${location}" has been copied.`,
                 });
               }}
               style={{
@@ -130,7 +125,6 @@ const Orders = () => {
         );
       },
     },
-
     {
       title: "Order Date",
       dataIndex: "orderDate",
@@ -150,36 +144,32 @@ const Orders = () => {
             : "red";
         return <Tag color={color}>{status.toUpperCase()}</Tag>;
       },
-      filters: [
-        { text: "All", value: "all" },
-        { text: "Completed", value: "completed" },
-        { text: "Processing", value: "processing" },
-        { text: "Cancelled", value: "cancelled" },
-      ],
-      onFilter: (value, record) => {
-        if (value === "all") return true;
-        return record.status === value;
-      },
     },
   ];
 
-  // if (error) {
-  //   return <p>{error}</p>;
-  // }
-
   return (
     <div>
-      <h1 className="text-lg font-bold mb-4">Orders</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-lg font-bold">Orders</h1>
+        <Select
+          value={selectedCountry}
+          onChange={handleCountryChange}
+          style={{ width: 200 }}
+        >
+          <Option value="all">All Countries</Option>
+          <Option value="GH">Ghana</Option>
+          <Option value="US">United States</Option>
+        </Select>
+      </div>
       <Table
         columns={columns}
-        dataSource={orders}
+        dataSource={filteredOrders}
         pagination={{
           current: pagination.current,
           pageSize: pagination.pageSize,
           total: pagination.total,
           showSizeChanger: true,
         }}
-        onChange={handleTableChange}
         bordered
         loading={loading}
       />
