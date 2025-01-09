@@ -72,9 +72,14 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (selected) {
-      formRef.current.setFieldsValue(selected);
+      formRef.current.setFieldsValue({ ...selected });
+      form.setFieldsValue({ assetImage: selected.image });
+      setImagePreview(selected.image || null);
+    } else {
+      form.resetFields();
+      setImagePreview(null);
     }
-  }, [selected]);
+  }, [form, selected]);
 
   useEffect(() => {
     const getOrders = async () => {
@@ -96,47 +101,45 @@ const Dashboard = () => {
 
   // Upload Image Function
   const onFinish = async (values) => {
-    setLoading(true); // Set loading to true when form submission starts
+    setLoading(true);
     const formData = new FormData();
+
+    // Add text fields to the form data
     formData.append("title", values.title);
     formData.append("dollarPrice", values.dollarPrice);
     formData.append("cediPrice", values.cediPrice);
     formData.append("dollarDiscount", values.dollarDiscount);
-
+    formData.append("cediDiscount", values.cediDiscount);
     formData.append("length", values.length);
     formData.append("width", values.width);
     formData.append("height", values.height);
     formData.append("weight", values.weight);
     formData.append("country", values.country);
-    formData.append("cediDiscount", values.cediDiscount);
 
-    // Check if the file is appended properly
+    // Handle asset image
     const assetImageFile = values.assetImage?.file?.originFileObj;
+
     if (assetImageFile) {
       formData.append("assetImage", assetImageFile);
-    } else {
-      console.error("No asset image file available");
+    } else if (selected?.image) {
+      formData.append("image", selected.image); // Maintain old image URL
     }
-
-    // Log FormData content for debugging
-    formData.forEach((value, key) => {
-      console.log(key, value); // This will show each item in the FormData
-    });
 
     try {
       if (selected) {
         await updateProductById(selected._id, formData);
-        await getData();
+        message.success("Product updated successfully!");
       } else {
         await createProduct(formData);
-        await getData();
         message.success("Product created successfully!");
       }
 
+      await getData(); // Refresh product data
       form.resetFields();
-      setDrawerVisible(false);
+      handleDrawerClose();
     } catch (error) {
-      console.error("Error submitting form:", error);
+      message.error("Failed to save product details.");
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -169,6 +172,12 @@ const Dashboard = () => {
     setSelected(record);
     setImagePreview(record.image);
     setDrawerVisible(true);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerVisible(false);
+    setSelected(null);
+    setImagePreview(null); // Clear image preview
   };
 
   const handleDelete = (record) => {
@@ -334,6 +343,7 @@ const Dashboard = () => {
       {/* Product Table */}
       <div style={{ overflowX: "auto" }}>
         <Table
+          loading={loading}
           dataSource={productData}
           columns={productColumns}
           pagination={{ pageSize: 10 }}
@@ -426,16 +436,11 @@ const Dashboard = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item
-            name="assetImage"
-            label="Asset Image"
-            rules={[
-              { required: true, message: "Please upload an asset image" },
-            ]}
-          >
+          <Form.Item name="assetImage" label="Asset Image">
             <Upload
               name="file"
               showUploadList={false}
+              onRemove={() => setImagePreview(null)}
               beforeUpload={(file) => {
                 const isImage =
                   file.type === "image/png" || file.type === "image/jpeg";
