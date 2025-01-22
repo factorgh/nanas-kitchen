@@ -4,8 +4,9 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { messaging } from "../../firebaseConfig";
 
 const { Header, Sider, Content } = Layout;
 
@@ -17,6 +18,29 @@ const DashboardLayout = () => {
     window.location.reload();
   };
 
+  useEffect(() => {
+    // Request notification permission
+    const requestNotificationPermission = async () => {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          console.log("Notification permission granted.");
+
+          // Get the Firebase Cloud Messaging token
+          const token = await messaging.getToken({
+            vapidKey:
+              "BJZ8NevO2bxF5ZcUh3mu1dYcNSu60QBxaku6eLx3TZxZE14yFw9WoXUbhOLNLe0tGypUW6ynHNRz0UkaUmdIw7c",
+          });
+          console.log("FCM Token:", token);
+          // Save the token to your server or local storage for sending notifications later
+        }
+      } catch (error) {
+        console.error("Error getting notification permission:", error);
+      }
+    };
+
+    requestNotificationPermission();
+  }, []);
   // Determine the selected menu key based on the current pathname
   const selectedKey = location.pathname.includes("orders") ? "2" : "1";
 

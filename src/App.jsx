@@ -9,9 +9,69 @@ import LoginPage from "./pages/Login";
 import Orders from "./pages/Orders";
 import OurStoryPage from "./pages/OurStory";
 import ProductPage from "./pages/Product";
+import ProductDetailPage from "./pages/ProductDetailPage";
 import SuccessPage from "./pages/Success";
 
 const App = () => {
+  const BASE_URL = import.meta.env.VITE_API_URL;
+  navigator.serviceWorker.addEventListener("message", () => {
+    let count = localStorage.getItem("notifCount") || 0;
+    count++;
+    localStorage.setItem("notifCount", count);
+    document.getElementById("notif-badge").innerText = count;
+  });
+
+  // Handle push notifications
+  const publicVapidKey = import.meta.env.ITE_VAPID_PUBLIC_KEY;
+  const adminId = localStorage.getItem("adminId");
+
+  // Register Service Worker
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => {
+        console.log("Service Worker Registered");
+
+        // Ask for permission
+        Notification.requestPermission().then((permission) => {
+          if (permission === "granted") {
+            subscribeToPush(registration, adminId);
+          }
+        });
+      })
+      .catch((error) => console.error("Service Worker Error", error));
+  }
+
+  // Subscribe to push notifications
+  async function subscribeToPush(registration, adminId) {
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicVapidKey),
+    });
+
+    await fetch(`${BASE_URL}/noti/subscribe`, {
+      method: "POST",
+      body: JSON.stringify({ subscription, adminId }), // Send adminId
+      headers: { "Content-Type": "application/json" },
+    });
+
+    console.log("Admin subscribed!");
+  }
+
+  // Convert VAPID key
+  function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, "+")
+      .replace(/_/g, "/");
+    const rawData = atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; i++) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -25,6 +85,7 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/success" element={<SuccessPage />} />
+        <Route path="/product-detail/:id" element={<ProductDetailPage />} />
 
         {/* Protected routes */}
         <Route

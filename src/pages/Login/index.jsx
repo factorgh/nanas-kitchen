@@ -29,6 +29,7 @@ const LoginPage = () => {
       setIsAuthenticated(true);
       // Set loggedIn state to true in the local storage
       localStorage.setItem("isLoggedIn", true);
+      localStorage.setItem("adminId", "nana's-Kitchen");
       navigate("/admin/dashboard");
       message.success("Logged in successfully");
       setError("");

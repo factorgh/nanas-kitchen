@@ -82,7 +82,7 @@ const CheckoutPage = () => {
   console.log(savedDI);
   console.log(savedCT);
 
-  const [protectivePackage, setIsProtectivePackage] = useState(false);
+  // const [protectivePackage, setIsProtectivePackage] = useState(false);
   const formattedPrice = (price, currency, locale) =>
     formatCurrency(price, currency, locale);
 
@@ -189,16 +189,11 @@ const CheckoutPage = () => {
     )
   );
 
-  const protectivePackageCost = 30;
+  const calculatedTotalPrice = totalCartPrice + +deliveryFee;
 
-  const calculatedTotalPrice =
-    totalCartPrice +
-    (protectivePackage ? protectivePackageCost : 0) +
-    deliveryFee;
-
-  const handleProtectivePackageChange = (checked) => {
-    setIsProtectivePackage(checked);
-  };
+  // const handleProtectivePackageChange = (checked) => {
+  //   setIsProtectivePackage(checked);
+  // };
 
   // Hnadle Form submit
   const onFinish = async (values) => {
@@ -779,7 +774,7 @@ const CheckoutPage = () => {
                   )} */}
                 </div>
               )}
-              {userCountry === "GHANA" && (
+              {/* {userCountry === "GHANA" && (
                 <Row>
                   <Form.Item label="">
                     <Checkbox
@@ -792,7 +787,7 @@ const CheckoutPage = () => {
                     </Checkbox>
                   </Form.Item>
                 </Row>
-              )}
+              )} */}
 
               <div className="flex justify-between mt-5">
                 <div>Sub Total</div>

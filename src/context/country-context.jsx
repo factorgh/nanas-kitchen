@@ -6,11 +6,15 @@ const CountryContext = createContext();
 
 // Create the provider component
 export const CountryProvider = ({ children }) => {
-  const [userCountry, setUserCountry] = useState(() => {
-    // Check localStorage for an existing country
-    const storedCountry = localStorage.getItem("userCountry");
-    return storedCountry ? storedCountry : "";
-  });
+  const [userCountry, setUserCountry] = useState(
+    ""
+
+    // () => {
+    // // Check localStorage for an existing country
+    // const storedCountry = localStorage.getItem("userCountry");
+    // return storedCountry ? storedCountry : "";
+    // }
+  );
 
   useEffect(() => {
     if (!userCountry) {

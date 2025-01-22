@@ -25,19 +25,19 @@ const Footer = () => {
               href="tel:+18322769667"
               className="text-sm md:text-base hover:underline"
             >
-              +1 832 276 9667
+              USA : +1 832 276 9667
             </a>
             <a
               href="tel:+233534789333"
               className="text-sm md:text-base hover:underline"
             >
-              +233 534 789 333
+              Ghana : +233 534 789 333
             </a>
             <a
               href="tel:+2330242492556"
               className="text-sm md:text-base hover:underline"
             >
-              +233 024 249 2556
+              Ghana : +233 242 492 556
             </a>
 
             {/* Email */}
@@ -49,10 +49,10 @@ const Footer = () => {
             </a>
 
             {/* Location */}
-            <p className="text-sm md:text-base text-center">
+            {/* <p className="text-sm md:text-base text-center">
               <span className="font-bold">Location:</span> 7850 W. Grand Parkway
               South, Richmond, Texas 77406
-            </p>
+            </p> */}
           </div>
         </div>
       </div>

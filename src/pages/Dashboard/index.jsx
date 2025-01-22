@@ -52,6 +52,8 @@ const Dashboard = () => {
     return false; // Prevent auto-upload
   };
 
+  // Handle Push Notificatioms
+
   useEffect(() => {
     const getProducts = async () => {
       setLoading(true); // Set loading to true before starting the fetch
@@ -61,7 +63,6 @@ const Dashboard = () => {
         setProductData(data); // Update the state with the fetched data
       } catch (error) {
         console.error("Failed to fetch products:", error);
-        message.error("Failed to fetch products");
       } finally {
         setLoading(false);
       }
@@ -90,7 +91,6 @@ const Dashboard = () => {
         setOrders(data); // Update the state with the fetched data
       } catch (error) {
         console.error("Failed to fetch products:", error);
-        message.error("Failed to fetch products");
       } finally {
         setLoading(false);
       }
@@ -314,7 +314,7 @@ const Dashboard = () => {
         <Col xs={24} sm={12} md={8} lg={8}>
           <Card
             className="shadow-md"
-            style={{ borderLeft: "5px solid #52c41a" }}
+            style={{ borderLeft: "5px solid #ff0000" }}
           >
             <div className="flex items-center justify-between">
               <div>
@@ -323,7 +323,7 @@ const Dashboard = () => {
                   {ghanaOrders + usdOrders}
                 </p>
               </div>
-              <Wallet className="text-green-500" />
+              <Wallet className="text-[#ff0000]" />
             </div>
           </Card>
         </Col>
