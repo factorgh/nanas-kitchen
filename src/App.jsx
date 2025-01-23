@@ -10,6 +10,7 @@ import Orders from "./pages/Orders";
 import OurStoryPage from "./pages/OurStory";
 import ProductPage from "./pages/Product";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import AdminReviewsPage from "./pages/Reviews";
 import SuccessPage from "./pages/Success";
 
 const App = () => {
@@ -109,6 +110,14 @@ const App = () => {
             element={
               <Layout>
                 <Orders />
+              </Layout>
+            }
+          />
+          <Route
+            path="reviews"
+            element={
+              <Layout>
+                <AdminReviewsPage />
               </Layout>
             }
           />

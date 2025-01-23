@@ -1,11 +1,13 @@
 /* eslint-disable react/prop-types */
 import { motion } from "framer-motion";
 import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { CountryContext } from "../context/country-context";
 import { formatCurrency } from "../utils/currency-formatter";
 
 const ProductCard = ({ product, handleAddToCart }) => {
   const { userCountry } = useContext(CountryContext);
+  const navigate = useNavigate();
 
   const formattedPrice = (price, currency, locale) =>
     formatCurrency(price, currency, locale);
@@ -31,6 +33,11 @@ const ProductCard = ({ product, handleAddToCart }) => {
   // 16 oz Black Shitor (Mild)
   // 16 oz Black Shitor (Hot)
 
+  const handleGoToDetail = () => {
+    // Navigate to product detail page
+    navigate(`/product-detail/${product._id}`);
+  };
+
   const buttonClass = `${color} text-white p-4 mt-3 w-48 rounded-lg`;
 
   if (product.title)
@@ -43,7 +50,7 @@ const ProductCard = ({ product, handleAddToCart }) => {
           ease: "circInOut",
           duration: 0.5,
         }}
-        className="flex flex-col items-center"
+        className="flex flex-col items-center "
       >
         {/* Image */}
         <div className="flex justify-end w-full ">
@@ -51,7 +58,12 @@ const ProductCard = ({ product, handleAddToCart }) => {
             Sale!
           </div>
         </div>
-        <img className="w-52 h-52" src={product.image} alt={product.title} />
+        <img
+          onClick={handleGoToDetail}
+          className="w-52 h-52 cursor-pointer"
+          src={product.image}
+          alt={product.title}
+        />
         {/* Title */}
         <h3 className="text-xl font-bold">{product.title}</h3>
         {/* Price */}

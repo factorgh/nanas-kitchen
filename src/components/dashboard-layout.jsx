@@ -4,6 +4,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
+import { MessageSquareText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { messaging } from "../../firebaseConfig";
@@ -42,8 +43,13 @@ const DashboardLayout = () => {
     requestNotificationPermission();
   }, []);
   // Determine the selected menu key based on the current pathname
-  const selectedKey = location.pathname.includes("orders") ? "2" : "1";
+  const menuKeyMap = {
+    "/admin/dashboard": "1",
+    "/admin/orders": "2",
+    "/admin/reviews": "3",
+  };
 
+  const selectedKey = menuKeyMap[location.pathname] || "1";
   return (
     <Layout className="h-screen">
       {/* Sidebar */}
@@ -54,7 +60,7 @@ const DashboardLayout = () => {
         className="bg-gray-900"
       >
         <div className="h-16 text-white flex items-center justify-center text-lg font-bold">
-          {collapsed ? "Logo" : "Admin"}
+          {collapsed ? "Admin" : "Admin"}
         </div>
         <Menu
           theme="dark"
@@ -67,6 +73,9 @@ const DashboardLayout = () => {
           </Menu.Item>
           <Menu.Item key="2" icon={<UserOutlined />}>
             <Link to="/admin/orders">Orders</Link>
+          </Menu.Item>
+          <Menu.Item key="3" icon={<MessageSquareText size={20} />}>
+            <Link to="/admin/reviews">Reviews</Link>
           </Menu.Item>
 
           <Menu.Item key="4" icon={<LogoutOutlined />}>
