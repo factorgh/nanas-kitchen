@@ -59,3 +59,15 @@ export const getCarriersCode = async () => {
 };
 
 export const getRates = () => {};
+
+export const updateOrderStatus = async (orderId, orderData) => {
+  try {
+    const response = await axiosInstance.put(`/orders/${orderId}`, {
+      status: orderData,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating product:", error);
+    throw error;
+  }
+};

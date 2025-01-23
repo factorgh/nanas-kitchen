@@ -1,5 +1,7 @@
-import { Button, Card, message, Modal, Rate, Select, Spin } from "antd";
+import { Card, message, Rate, Spin } from "antd";
 import { useEffect, useState } from "react";
+import { FaCheck } from "react-icons/fa6";
+import { MdOutlineClose } from "react-icons/md";
 import {
   getAllReviews,
   updateProductReviewById,
@@ -8,10 +10,6 @@ import {
 export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedReview, setSelectedReview] = useState(null);
-  const [status, setStatus] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
-  const [reviewId, setReviewId] = useState(null);
 
   useEffect(() => {
     async function getProductReviews() {
@@ -26,30 +24,22 @@ export default function AdminReviewsPage() {
   // Fetch reviews (Mocked API Call)
 
   // Handle Edit Click (Open Modal)
-  const handleEditClick = (review) => {
-    setSelectedReview(review);
-    setReviewId(review._id);
-    setStatus(review.status);
-    setModalVisible(true);
-  };
+  // const handleEditClick = (review) => {
+  //   setSelectedReview(review);
+  //   setReviewId(review._id);
+  //   setStatus(review.status);
+  //   setModalVisible(true);
+  // };
 
-  // Handle Status Update
-  const handleUpdateStatus = async () => {
-    if (!status) {
-      return message.error("Please select a status");
-    }
-
+  const handleUpdateStatus = async (reviewId, status) => {
     // Send request to api
     await updateProductReviewById(reviewId, status);
 
     setReviews((prevReviews) =>
-      prevReviews.map((r) =>
-        r._id === selectedReview._id ? { ...r, status } : r
-      )
+      prevReviews.map((r) => (r._id === reviewId ? { ...r, status } : r))
     );
 
     message.success("Review status updated successfully");
-    setModalVisible(false);
   };
 
   if (loading) {
@@ -67,7 +57,7 @@ export default function AdminReviewsPage() {
           <Card key={review._id} className="shadow-md rounded-lg">
             <div className="flex justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-800">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">
                   {review.name}
                 </h3>
                 <Rate
@@ -90,16 +80,33 @@ export default function AdminReviewsPage() {
                 </p>
               </div>
 
-              <Button type="primary" onClick={() => handleEditClick(review)}>
-                Edit
-              </Button>
+              <div className="cursor-pointer flex justify-start gap-3">
+                {" "}
+                <span
+                  onClick={() => handleUpdateStatus(review._id, "approved")}
+                  className="p-2 border rounded-md h-5 flex items-center"
+                >
+                  {" "}
+                  <FaCheck className="text-emerald-500" size={15} />
+                </span>
+                <span
+                  onClick={() => handleUpdateStatus(review._id, "rejected")}
+                  className="p-2 border rounded-md h-5 flex items-center"
+                >
+                  {" "}
+                  <MdOutlineClose
+                    className="text-red-500 font-bold"
+                    size={15}
+                  />
+                </span>
+              </div>
             </div>
           </Card>
         ))}
       </div>
 
       {/* Edit Review Status Modal */}
-      <Modal
+      {/* <Modal
         title="Edit Review Status"
         visible={modalVisible}
         onCancel={() => setModalVisible(false)}
@@ -115,7 +122,7 @@ export default function AdminReviewsPage() {
             { value: "rejected", label: "Rejected" },
           ]}
         />
-      </Modal>
+      </Modal> */}
     </div>
   );
 }
