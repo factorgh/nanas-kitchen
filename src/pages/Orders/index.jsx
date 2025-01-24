@@ -1,8 +1,9 @@
-import { notification, Select, Table } from "antd";
+import { Modal, notification, Select, Table } from "antd";
 import { Copy } from "lucide-react";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import StatusDropdown from "../../components/StatusDropdown"; // Ensure this path is correct
+import { GenerateOrderModal } from "../../components/generate-order";
 import { getAllOrders } from "../../services/order-service";
 
 const { Option } = Select;
@@ -13,12 +14,23 @@ const Orders = () => {
   const [error, setError] = useState(null);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("all");
+  const [showOrderDetailModal, setShowOrderDetailModal] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
     total: 0,
   });
 
+  const handleShowOrderDetailModal = (order) => {
+    setSelectedOrder(order);
+    setShowOrderDetailModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowOrderDetailModal(false);
+    setSelectedOrder(null);
+  };
   const fetchOrders = async () => {
     setLoading(true);
     try {
@@ -27,6 +39,7 @@ const Orders = () => {
         ...order,
         key: order._id,
       }));
+      console.log(formattedOrders);
       setOrders(formattedOrders);
       setFilteredOrders(formattedOrders); // Initialize filtered orders
       setPagination((prev) => ({
@@ -91,7 +104,22 @@ const Orders = () => {
       title: "Order ID",
       dataIndex: "_id",
       key: "_id",
-      render: (_id) => `#${_id.toString().slice(-6)}`,
+      render: (_id, record) => (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <button
+            onClick={() => handleShowOrderDetailModal(record)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              color: "#007bff",
+            }}
+          >
+            #${_id.toString().slice(-6)}
+          </button>
+        </div>
+      ),
     },
     {
       title: "Customer",
@@ -162,6 +190,19 @@ const Orders = () => {
         moment(record.createdAt).format("YYYY-MM-DD - HH:mm:ss A"),
     },
     {
+      title: "Country",
+      dataIndex: "country",
+      key: "country",
+      render: (_, record) => {
+        if (record.userDetails?.country === "GH") {
+          return "Ghana";
+        } else if (record.userDetails?.country === "USA") {
+          return "USA";
+        }
+        return "Unknown Country";
+      },
+    },
+    {
       title: "Status",
       dataIndex: "status",
       key: "status",
@@ -218,6 +259,16 @@ const Orders = () => {
         bordered
         loading={loading}
       />
+      {showOrderDetailModal && selectedOrder && (
+        <Modal
+          title="Order Details"
+          open={showOrderDetailModal}
+          onCancel={handleModalClose}
+          footer={null}
+        >
+          {selectedOrder && <GenerateOrderModal order={selectedOrder} />}
+        </Modal>
+      )}
     </div>
   );
 };
