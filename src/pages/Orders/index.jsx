@@ -136,7 +136,7 @@ const Orders = () => {
 
   const handleUpdateOrder = async (order) => {
     await updateOrderStatus(order._id, order.status);
-    await getAllOrders();
+    await fetchOrders();
     notification.success({
       message: "Order Updated",
       description: "The order status has been updated successfully.",
