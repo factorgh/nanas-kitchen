@@ -617,44 +617,49 @@ const CheckoutPage = () => {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label="Phone" name="phone">
-                    <Input
-                      placeholder="Enter your phone number"
-                      rules={[
-                        { required: true, message: "Field is required!" },
-                      ]}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
                   <Form.Item
                     rules={[
                       { required: true, message: "This field is required" },
                     ]}
-                    label="Address"
-                    name="address"
+                    label="Phone"
+                    name="phone"
                   >
-                    <Input
-                      placeholder="Enter your address"
-                      rules={[
-                        { required: true, message: "Field is required!" },
-                      ]}
-                    />
+                    <Input placeholder="Enter your phone number" />
                   </Form.Item>
                 </Col>
+                {userCountry !== "GHANA" && (
+                  <Col span={12}>
+                    <Form.Item
+                      rules={[
+                        { required: true, message: "This field is required" },
+                      ]}
+                      label="Address"
+                      name="address"
+                    >
+                      <Input
+                        placeholder="Enter your address"
+                        rules={[
+                          { required: true, message: "Field is required!" },
+                        ]}
+                      />
+                    </Form.Item>
+                  </Col>
+                )}
               </Row>
               <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    label="State / City"
-                    rules={[
-                      { required: true, message: "This field is required" },
-                    ]}
-                    name="state"
-                  >
-                    <Input placeholder="Enter your state or city" />
-                  </Form.Item>
-                </Col>
+                {userCountry !== "GHANA" && (
+                  <Col span={12}>
+                    <Form.Item
+                      label="State / City"
+                      rules={[
+                        { required: true, message: "This field is required" },
+                      ]}
+                      name="state"
+                    >
+                      <Input placeholder="Enter your state or city" />
+                    </Form.Item>
+                  </Col>
+                )}
                 {userCountry !== "GHANA" && (
                   <Col span={12}>
                     <Form.Item
