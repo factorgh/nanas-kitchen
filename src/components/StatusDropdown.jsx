@@ -4,17 +4,16 @@ import { Dropdown, Menu, message, Tag } from "antd";
 import { useState } from "react";
 import { updateOrderStatus } from "../services/order-service";
 
-const StatusDropdown = ({ initialStatus, orderId }) => {
+const StatusDropdown = ({ initialStatus, orderId, activeTab }) => {
   const [status, setStatus] = useState(initialStatus);
 
   // Define color mapping for each status
   const statusColors = {
     delivered: "blue",
     completed: "green",
-
     cancelled: "error",
     processing: "gold",
-    // Add more status-color mappings as needed
+    awaiting_payment: "orange",
   };
 
   const handleStatusChange = async (newStatus) => {
@@ -27,33 +26,33 @@ const StatusDropdown = ({ initialStatus, orderId }) => {
     e.preventDefault();
   };
 
-  const menu = (
-    <Menu>
-      <Menu.Item
-        key="delivered"
-        onClick={() => handleStatusChange("delivered")}
-      >
-        Delivered
-      </Menu.Item>
+  // Define menu options based on activeTab
+  let menuItems = [];
+  if (activeTab === "awaiting_payment") {
+    menuItems.push(
       <Menu.Item
         key="completed"
         onClick={() => handleStatusChange("completed")}
       >
         Completed
       </Menu.Item>
-
+    );
+  } else if (activeTab === "completed") {
+    menuItems.push(
       <Menu.Item
-        key="processing"
-        onClick={() => handleStatusChange("awaitng_payment")}
+        key="delivered"
+        onClick={() => handleStatusChange("delivered")}
       >
-        Awaitng Payment
+        Delivered
       </Menu.Item>
-      {/* Add more status options here */}
-    </Menu>
-  );
+    );
+  }
+
+  // If it's "delivered", menuItems remains empty (no dropdown)
+  const menu = menuItems.length > 0 ? <Menu>{menuItems}</Menu> : null;
 
   return (
-    <Dropdown overlay={menu} trigger={["click"]}>
+    <Dropdown overlay={menu} trigger={["click"]} disabled={!menu}>
       <a className="ant-dropdown-link" onClick={(e) => handleDrop(e)}>
         <Tag color={statusColors[status] || "default"}>
           {status.charAt(0).toUpperCase() + status.slice(1)} <DownOutlined />

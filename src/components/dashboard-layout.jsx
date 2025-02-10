@@ -1,6 +1,5 @@
 import {
   DashboardOutlined,
-  DeleteOutlined,
   LogoutOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -99,14 +98,14 @@ const DashboardLayout = () => {
           <div className="text-lg font-semibold">
             Welcome to Nana&apos;s Kitchen Dashboard
           </div>
-          <div className="flex items-center">
+          {/* <div className="flex items-center">
             <button
               onClick={handleTrash}
               className="text-sm font-semibold text-gray-600 hover:text-gray-900"
             >
               Trash <DeleteOutlined />
             </button>
-          </div>
+          </div> */}
         </Header>
 
         {/* Content Area */}

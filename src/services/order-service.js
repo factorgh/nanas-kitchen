@@ -89,3 +89,12 @@ export const getDeletedOrders = () => {
     throw error;
   }
 };
+
+export const massDelete = () => {
+  try {
+    return axiosInstance.delete(`/orders/mass-delete`);
+  } catch (error) {
+    console.error("Error mass deleting orders:", error);
+    throw error;
+  }
+};

@@ -12,7 +12,6 @@ import ProductPage from "./pages/Product";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import AdminReviewsPage from "./pages/Reviews";
 import SuccessPage from "./pages/Success";
-import Trash from "./pages/Trash";
 
 const App = () => {
   const BASE_URL = import.meta.env.VITE_API_URL;
@@ -114,14 +113,7 @@ const App = () => {
               </Layout>
             }
           />
-          <Route
-            path="trash"
-            element={
-              <Layout>
-                <Trash />
-              </Layout>
-            }
-          />
+
           <Route
             path="reviews"
             element={

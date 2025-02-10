@@ -1,5 +1,5 @@
 import { DeleteOutlined } from "@ant-design/icons";
-import { Modal, notification, Select, Table, Tabs } from "antd";
+import { Button, Modal, notification, Select, Table, Tabs } from "antd";
 import { Copy } from "lucide-react";
 import moment from "moment";
 import { useEffect, useState } from "react";
@@ -9,6 +9,8 @@ import { GenerateOrderModal } from "../../components/generate-order";
 import {
   deleteOrder,
   getAllOrders,
+  getDeletedOrders,
+  massDelete,
   updateOrderStatus,
 } from "../../services/order-service";
 
@@ -24,6 +26,7 @@ const Orders = () => {
   const [selectedCountry, setSelectedCountry] = useState("all");
   const [showOrderDetailModal, setShowOrderDetailModal] = useState(false); // Fixed initial state
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [deletedOrders, setDeletedOrders] = useState([]);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -78,8 +81,27 @@ const Orders = () => {
     }
   };
 
+  const fetchDeletedOrders = async () => {
+    setLoading(true);
+    try {
+      const response = await getDeletedOrders();
+      setDeletedOrders(response.data);
+      // setFilteredOrders(response.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.length,
+      }));
+    } catch (err) {
+      setError("Failed to load orders. Please try again later.");
+      console.error("Error fetching orders:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
+    fetchDeletedOrders();
   }, []);
 
   const handleTableChange = (pagination, filters) => {
@@ -114,6 +136,7 @@ const Orders = () => {
 
   const handleUpdateOrder = async (order) => {
     await updateOrderStatus(order._id, order.status);
+    await getAllOrders();
     notification.success({
       message: "Order Updated",
       description: "The order status has been updated successfully.",
@@ -210,52 +233,59 @@ const Orders = () => {
           ? "USA"
           : "Unknown Country",
     },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (_, record) => (
-        <StatusDropdown
-          initialStatus={record.status}
-          key={record._id}
-          orderId={record._id}
-          onStatusChange={async (newStatus) => {
-            const updatedOrders = orders.map((order) => {
-              order._id === record._id
-                ? { ...order, status: newStatus }
-                : order;
-            });
-            await handleUpdateOrder(record);
 
-            setOrders(updatedOrders);
-            setFilteredOrders(updatedOrders);
-          }}
-        />
-      ),
-      filters: [
-        { text: "All", value: "all" },
-        { text: "Completed", value: "completed" },
-        { text: "Awaiting Payment", value: "awaiting_payment" },
-        { text: "Delivered", value: "delivered" },
-      ],
-      onFilter: (value, record) =>
-        value === "all" ? true : record.status === value,
-    },
-    {
-      title: "Action",
-      dataIndex: "action",
-      key: "action",
-      render: (_, record) => (
-        <span>
-          <DeleteOutlined
-            className="text-red-800"
-            type="link"
-            danger
-            onClick={() => handleDelete(record)}
-          />
-        </span>
-      ),
-    },
+    ...(activeTab !== "trash"
+      ? [
+          {
+            title: "Status",
+            dataIndex: "status",
+            key: "status",
+            render: (_, record) => (
+              <StatusDropdown
+                activeTab={activeTab}
+                initialStatus={record.status}
+                key={record._id}
+                orderId={record._id}
+                onStatusChange={async (newStatus) => {
+                  const updatedOrders = orders.map((order) => {
+                    order._id === record._id
+                      ? { ...order, status: newStatus }
+                      : order;
+                  });
+                  await handleUpdateOrder(record);
+
+                  setOrders(updatedOrders);
+                  setFilteredOrders(updatedOrders);
+                }}
+              />
+            ),
+            filters: [
+              { text: "All", value: "all" },
+              { text: "Completed", value: "completed" },
+              { text: "Awaiting Payment", value: "awaiting_payment" },
+              { text: "Delivered", value: "delivered" },
+            ],
+            onFilter: (value, record) =>
+              value === "all" ? true : record.status === value,
+          },
+
+          {
+            title: "Action",
+            dataIndex: "action",
+            key: "action",
+            render: (_, record) => (
+              <span>
+                <DeleteOutlined
+                  className="text-red-800"
+                  type="link"
+                  danger
+                  onClick={() => handleDelete(record)}
+                />
+              </span>
+            ),
+          },
+        ]
+      : []),
   ];
 
   const handleDelete = async (order) => {
@@ -270,8 +300,35 @@ const Orders = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await deleteOrder(order._id); // Call your delete function
+          await deleteOrder(order._id);
+          await fetchDeletedOrders();
           Swal.fire("Deleted!", "Your order has been deleted.", "success");
+        } catch (error) {
+          console.log(error);
+          Swal.fire("Error!", "Something went wrong.", "error");
+        }
+      }
+    });
+  };
+  const handleEmptyTrash = async () => {
+    Swal.fire({
+      title: "Are you sure you want to empty trash?",
+      text: "You won't be able to undo this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await massDelete();
+          await getAllOrders();
+          Swal.fire(
+            "Deleted!",
+            "Your order trash has been emptied.",
+            "success"
+          );
         } catch (error) {
           console.log(error);
           Swal.fire("Error!", "Something went wrong.", "error");
@@ -299,10 +356,22 @@ const Orders = () => {
         <TabPane tab="Completed" key="completed" />
         <TabPane tab="Awaiting Payment" key="awaiting_payment" />
         <TabPane tab="Delivered" key="delivered" />
+        <TabPane tab="Trash" key="trash" />
       </Tabs>
+      {activeTab === "trash" && (
+        <div className="flex justify-end">
+          <Button
+            className="bg-red-800 text-white flex items-center gap-2 mb-3"
+            type="primary"
+            onClick={handleEmptyTrash}
+          >
+            Empty Trash <DeleteOutlined />
+          </Button>
+        </div>
+      )}
       <Table
         columns={columns}
-        dataSource={filteredOrders}
+        dataSource={activeTab === "trash" ? deletedOrders : filteredOrders}
         onChange={handleTableChange}
         pagination={{
           current: pagination.current,
