@@ -1,26 +1,52 @@
-import { Modal, notification, Select, Table } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
+import { Modal, notification, Select, Table, Tabs } from "antd";
 import { Copy } from "lucide-react";
 import moment from "moment";
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 import StatusDropdown from "../../components/StatusDropdown"; // Ensure this path is correct
 import { GenerateOrderModal } from "../../components/generate-order";
-import { getAllOrders } from "../../services/order-service";
+import {
+  deleteOrder,
+  getAllOrders,
+  updateOrderStatus,
+} from "../../services/order-service";
 
 const { Option } = Select;
+const { TabPane } = Tabs;
 
 const Orders = () => {
+  const [activeTab, setActiveTab] = useState("processing");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("all");
-  const [showOrderDetailModal, setShowOrderDetailModal] = useState(true);
+  const [showOrderDetailModal, setShowOrderDetailModal] = useState(false); // Fixed initial state
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
     total: 0,
   });
+
+  const handleTabChange = (key) => {
+    console.log(key);
+    setActiveTab(key);
+    const filtered = orders.filter((order) => order.status === key);
+    console.log(filtered);
+    setFilteredOrders(filtered);
+    setPagination((prev) => ({
+      ...prev,
+      total: filtered.length,
+    }));
+  };
+
+  useEffect(() => {
+    // Ensure filtering happens when orders are fetched or updated
+    const filtered = orders.filter((order) => order.status === activeTab);
+    setFilteredOrders(filtered);
+  }, [activeTab, orders]);
 
   const handleShowOrderDetailModal = (order) => {
     setSelectedOrder(order);
@@ -31,20 +57,18 @@ const Orders = () => {
     setShowOrderDetailModal(false);
     setSelectedOrder(null);
   };
+
   const fetchOrders = async () => {
     setLoading(true);
     try {
       const response = await getAllOrders();
-      const formattedOrders = response?.map((order) => ({
-        ...order,
-        key: order._id,
-      }));
-      console.log(formattedOrders);
-      setOrders(formattedOrders);
-      setFilteredOrders(formattedOrders); // Initialize filtered orders
+
+      console.log(response.data);
+      setOrders(response.data);
+      setFilteredOrders(response.data);
       setPagination((prev) => ({
         ...prev,
-        total: formattedOrders.length,
+        total: response.length,
       }));
     } catch (err) {
       setError("Failed to load orders. Please try again later.");
@@ -59,15 +83,13 @@ const Orders = () => {
   }, []);
 
   const handleTableChange = (pagination, filters) => {
-    setPagination({
-      ...pagination,
-    });
+    setPagination({ ...pagination });
 
     if (filters.status && filters.status.length > 0) {
-      // Apply filtering based on the selected filter
       const filtered = filters.status.includes("all")
         ? orders
         : orders.filter((order) => filters.status.includes(order.status));
+
       setFilteredOrders(filtered);
       setPagination((prev) => ({
         ...prev,
@@ -78,32 +100,31 @@ const Orders = () => {
 
   const handleCountryChange = (value) => {
     setSelectedCountry(value);
+    const filtered =
+      value === "all"
+        ? orders
+        : orders.filter((order) => order.userDetails?.country === value);
 
-    if (value === "all") {
-      setFilteredOrders(orders);
-    } else {
-      const filtered = orders.filter(
-        (order) => order.userDetails?.country === value
-      );
-      setFilteredOrders(filtered);
-    }
-
-    // Update pagination
+    setFilteredOrders(filtered);
     setPagination((prev) => ({
       ...prev,
-      total:
-        value === "all"
-          ? orders.length
-          : orders.filter((order) => order.userDetails?.country === value)
-              .length,
+      total: filtered.length,
     }));
+  };
+
+  const handleUpdateOrder = async (order) => {
+    await updateOrderStatus(order._id, order.status);
+    notification.success({
+      message: "Order Updated",
+      description: "The order status has been updated successfully.",
+    });
   };
 
   const columns = [
     {
       title: "Order ID",
       dataIndex: "_id",
-      key: "_id",
+      key: "order_id",
       render: (_id, record) => (
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <button
@@ -116,7 +137,7 @@ const Orders = () => {
               color: "#007bff",
             }}
           >
-            #${_id.toString().slice(-6)}
+            #{_id.toString().slice(-6)}
           </button>
         </div>
       ),
@@ -136,18 +157,8 @@ const Orders = () => {
       key: "totalAmount",
       render: (total, record) => {
         const country = record.userDetails?.country;
-        let formattedTotal;
-
-        switch (country) {
-          case "GH":
-            formattedTotal = `₵${total.toFixed(2)}`; // Ghanaian Cedi
-            break;
-          case "USD":
-            formattedTotal = `$${total.toFixed(2)}`; // US Dollar
-            break;
-          default:
-            formattedTotal = `$${total.toFixed(2)}`; // Default currency
-        }
+        const formattedTotal =
+          country === "GH" ? `₵${total.toFixed(2)}` : `$${total.toFixed(2)}`;
 
         return formattedTotal;
       },
@@ -157,16 +168,15 @@ const Orders = () => {
       dataIndex: "location",
       key: "location",
       render: (_, record) => {
-        const location = record.userDetails?.location;
+        const location = record.userDetails?.location || "N/A";
 
         return (
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {/* {location} */}
             <button
               onClick={() => {
-                navigator.clipboard.writeText(location || "");
-                notification.success({
-                  message: "Copied to Clipboard",
-                });
+                navigator.clipboard.writeText(location);
+                notification.success({ message: "Copied to Clipboard" });
               }}
               style={{
                 background: "none",
@@ -193,14 +203,12 @@ const Orders = () => {
       title: "Country",
       dataIndex: "country",
       key: "country",
-      render: (_, record) => {
-        if (record.userDetails?.country === "GH") {
-          return "Ghana";
-        } else if (record.userDetails?.country === "USA") {
-          return "USA";
-        }
-        return "Unknown Country";
-      },
+      render: (_, record) =>
+        record.userDetails?.country === "GH"
+          ? "Ghana"
+          : record.userDetails?.country === "USA"
+          ? "USA"
+          : "Unknown Country",
     },
     {
       title: "Status",
@@ -209,11 +217,16 @@ const Orders = () => {
       render: (_, record) => (
         <StatusDropdown
           initialStatus={record.status}
+          key={record._id}
           orderId={record._id}
-          onStatusChange={(newStatus) => {
-            const updatedOrders = orders.map((order) =>
-              order._id === record._id ? { ...order, status: newStatus } : order
-            );
+          onStatusChange={async (newStatus) => {
+            const updatedOrders = orders.map((order) => {
+              order._id === record._id
+                ? { ...order, status: newStatus }
+                : order;
+            });
+            await handleUpdateOrder(record);
+
             setOrders(updatedOrders);
             setFilteredOrders(updatedOrders);
           }}
@@ -222,20 +235,56 @@ const Orders = () => {
       filters: [
         { text: "All", value: "all" },
         { text: "Completed", value: "completed" },
-        { text: "Processing", value: "processing" },
+        { text: "Awaiting Payment", value: "awaiting_payment" },
         { text: "Delivered", value: "delivered" },
       ],
-      onFilter: (value, record) => {
-        if (value === "all") return true;
-        return record.status === value;
-      },
+      onFilter: (value, record) =>
+        value === "all" ? true : record.status === value,
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      key: "action",
+      render: (_, record) => (
+        <span>
+          <DeleteOutlined
+            className="text-red-800"
+            type="link"
+            danger
+            onClick={() => handleDelete(record)}
+          />
+        </span>
+      ),
     },
   ];
+
+  const handleDelete = async (order) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to undo this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteOrder(order._id); // Call your delete function
+          Swal.fire("Deleted!", "Your order has been deleted.", "success");
+        } catch (error) {
+          console.log(error);
+          Swal.fire("Error!", "Something went wrong.", "error");
+        }
+      }
+    });
+  };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-lg font-bold">Orders</h1>
+
         <Select
           value={selectedCountry}
           onChange={handleCountryChange}
@@ -246,6 +295,11 @@ const Orders = () => {
           <Option value="US">United States</Option>
         </Select>
       </div>
+      <Tabs defaultActiveKey="processing" onChange={handleTabChange}>
+        <TabPane tab="Completed" key="completed" />
+        <TabPane tab="Awaiting Payment" key="awaiting_payment" />
+        <TabPane tab="Delivered" key="delivered" />
+      </Tabs>
       <Table
         columns={columns}
         dataSource={filteredOrders}
@@ -266,7 +320,7 @@ const Orders = () => {
           onCancel={handleModalClose}
           footer={null}
         >
-          {selectedOrder && <GenerateOrderModal order={selectedOrder} />}
+          <GenerateOrderModal order={selectedOrder} />
         </Modal>
       )}
     </div>

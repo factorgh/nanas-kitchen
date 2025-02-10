@@ -44,9 +44,9 @@ const StatusDropdown = ({ initialStatus, orderId }) => {
 
       <Menu.Item
         key="processing"
-        onClick={() => handleStatusChange("processing")}
+        onClick={() => handleStatusChange("awaitng_payment")}
       >
-        Processing
+        Awaitng Payment
       </Menu.Item>
       {/* Add more status options here */}
     </Menu>

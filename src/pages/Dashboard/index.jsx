@@ -40,7 +40,7 @@ const Dashboard = () => {
 
   // Orders summary
   const ghanaOrders = orders
-    .filter((order) => order.userDetails.country === "GH")
+    ?.filter((order) => order.userDetails.country === "GH")
     .filter((order) => order.status === "completed").length;
   const usdOrders = orders
     .filter((order) => order.userDetails.country === "US")
@@ -88,7 +88,7 @@ const Dashboard = () => {
       try {
         const data = await getAllOrders();
         console.log(data);
-        setOrders(data); // Update the state with the fetched data
+        setOrders(data.data); // Update the state with the fetched data
       } catch (error) {
         console.error("Failed to fetch products:", error);
       } finally {

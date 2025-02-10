@@ -71,3 +71,21 @@ export const updateOrderStatus = async (orderId, orderData) => {
     throw error;
   }
 };
+
+export const deleteOrder = (orderId) => {
+  try {
+    return axiosInstance.delete(`/orders/${orderId}`);
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    throw error;
+  }
+};
+
+export const getDeletedOrders = () => {
+  try {
+    return axiosInstance.get(`/orders/trash`);
+  } catch (error) {
+    console.error("Error fetching deleted orders:", error);
+    throw error;
+  }
+};

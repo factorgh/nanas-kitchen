@@ -12,6 +12,7 @@ import ProductPage from "./pages/Product";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import AdminReviewsPage from "./pages/Reviews";
 import SuccessPage from "./pages/Success";
+import Trash from "./pages/Trash";
 
 const App = () => {
   const BASE_URL = import.meta.env.VITE_API_URL;
@@ -63,7 +64,7 @@ const App = () => {
   function urlBase64ToUint8Array(base64String) {
     const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding)
-      .replace(/\-/g, "+")
+      .replace(/-/g, "+")
       .replace(/_/g, "/");
     const rawData = atob(base64);
     const outputArray = new Uint8Array(rawData.length);
@@ -110,6 +111,14 @@ const App = () => {
             element={
               <Layout>
                 <Orders />
+              </Layout>
+            }
+          />
+          <Route
+            path="trash"
+            element={
+              <Layout>
+                <Trash />
               </Layout>
             }
           />

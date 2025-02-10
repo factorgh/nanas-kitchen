@@ -56,20 +56,24 @@ const Header = () => {
             ))}
             <Divider type="vertical" className="h-10 bg-white" />
             <li>
-              <Select
-                className="ml-3"
-                value={currentCountry}
-                style={{ width: 180 }}
-                onChange={(value) => {
-                  // Clear the cart
-                  // dispatch(clearCart());
-                  changeCountry(value);
-                  localStorage.setItem("userCountry", value);
-                }}
-              >
-                <Option value="USA">USA</Option>
-                <Option value="GHANA">GHANA</Option>
-              </Select>
+              <div className="flex flex-col md:flex-row items-center justify-center">
+                <label className="text-white text-sm mb-1 md:mb-0">
+                  Select location
+                </label>
+                <Select
+                  className="ml-2 mt-1"
+                  value={currentCountry}
+                  style={{ width: 100, padding: "2px", fontSize: "14px" }}
+                  onChange={(value) => {
+                    changeCountry(value);
+                    localStorage.setItem("userCountry", value);
+                    setMenuOpen(false);
+                  }}
+                >
+                  <Option value="USA">USA</Option>
+                  <Option value="GHANA">GHANA</Option>
+                </Select>
+              </div>
             </li>
           </ul>
         </div>

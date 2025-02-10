@@ -1,12 +1,13 @@
 import {
   DashboardOutlined,
+  DeleteOutlined,
   LogoutOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
 import { MessageSquareText } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { messaging } from "../../firebaseConfig";
 
 const { Header, Sider, Content } = Layout;
@@ -14,9 +15,14 @@ const { Header, Sider, Content } = Layout;
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation(); // Get current route location
+  const navigate = useNavigate(); //
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
     window.location.reload();
+  };
+
+  const handleTrash = () => {
+    navigate("/admin/trash");
   };
 
   useEffect(() => {
@@ -92,6 +98,14 @@ const DashboardLayout = () => {
         <Header className="bg-white shadow-md px-4 flex justify-between items-center">
           <div className="text-lg font-semibold">
             Welcome to Nana&apos;s Kitchen Dashboard
+          </div>
+          <div className="flex items-center">
+            <button
+              onClick={handleTrash}
+              className="text-sm font-semibold text-gray-600 hover:text-gray-900"
+            >
+              Trash <DeleteOutlined />
+            </button>
           </div>
         </Header>
 
