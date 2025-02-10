@@ -301,7 +301,7 @@ const Orders = () => {
       if (result.isConfirmed) {
         try {
           await deleteOrder(order._id);
-          await fetchDeletedOrders();
+          await fetchOrders();
           Swal.fire("Deleted!", "Your order has been deleted.", "success");
         } catch (error) {
           console.log(error);
@@ -323,7 +323,7 @@ const Orders = () => {
       if (result.isConfirmed) {
         try {
           await massDelete();
-          await getAllOrders();
+          await fetchDeletedOrders();
           Swal.fire(
             "Deleted!",
             "Your order trash has been emptied.",
