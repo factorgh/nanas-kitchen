@@ -32,10 +32,7 @@ export const handlePayStackPayment = async (
       metadata: {
         customerName: userDetails.name,
         customerPhone: userDetails.phone,
-        // cartItems: cartItems.map((item) => ({
-        //   name: item.name,
-        //   quantity: item.quantity,
-        // })),
+
         customNote: "Order from Nana's Kitchen",
       },
       callback: (response) => {

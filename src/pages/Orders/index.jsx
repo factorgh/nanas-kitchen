@@ -33,6 +33,7 @@ const Orders = () => {
     total: 0,
   });
 
+  console.log(error);
   const handleTabChange = (key) => {
     console.log(key);
     setActiveTab(key);

@@ -80,19 +80,24 @@ const Header = () => {
 
         {/* Mobile Menu Icon */}
         <div className="lg:hidden flex gap-3 items-center">
-          <Select
-            className="ml-2 mt-1"
-            value={currentCountry}
-            style={{ width: 100, padding: "2px", fontSize: "14px" }} // Adjusted width, padding, and font size
-            onChange={(value) => {
-              changeCountry(value);
-              localStorage.setItem("userCountry", value);
-              setMenuOpen(false);
-            }}
-          >
-            <Option value="USA">USA</Option>
-            <Option value="GHANA">GHANA</Option>
-          </Select>
+          <div className="flex flex-col gap-1 items-center">
+            <label className="text-white text-[12px] mb-1 md:mb-0">
+              Select location :
+            </label>
+            <Select
+              className="ml-2 "
+              value={currentCountry}
+              style={{ width: 100, padding: "2px", fontSize: "14px" }} // Adjusted width, padding, and font size
+              onChange={(value) => {
+                changeCountry(value);
+                localStorage.setItem("userCountry", value);
+                setMenuOpen(false);
+              }}
+            >
+              <Option value="USA">USA</Option>
+              <Option value="GHANA">GHANA</Option>
+            </Select>
+          </div>
           <Button
             icon={<MenuOutlined />}
             className="text-white bg-transparent border-none text-xl"
