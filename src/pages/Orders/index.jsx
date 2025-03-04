@@ -373,13 +373,7 @@ const Orders = () => {
       )}
       <Table
         columns={columns}
-        dataSource={
-          activeTab === "trash"
-            ? deletedOrders
-            : filteredOrders
-            ? filteredOrders
-            : []
-        }
+        dataSource={activeTab === "trash" ? deletedOrders : filteredOrders}
         onChange={handleTableChange}
         pagination={{
           current: pagination.current,
