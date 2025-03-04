@@ -218,7 +218,7 @@ const CheckoutPage = () => {
       handlePayStackPayment(
         setPaystackLoading,
         updatedCartItems,
-        updatedValues,
+        { ...updatedValues, address: convertedAddress },
         calculatedTotalPrice,
         handleRedirect
         // convertedPrice
@@ -488,11 +488,13 @@ const CheckoutPage = () => {
         lng: longitude,
       }));
     }
+
     form.setFieldsValue({ location: value });
     const deliverycost = deriveDeliveryRate(value);
     setDeliveryFee(deliverycost);
     console.log(deliverycost);
   };
+
   // Add total price calculation logic here
   const calculateStripeTotal = totalCartDollarPrice + shippingCost;
   console.log(
@@ -501,6 +503,10 @@ const CheckoutPage = () => {
   console.log(calculateStripeTotal);
 
   const handleStripeCheckout = async (updatedValues) => {
+    console.log(
+      "----------------------------------------------------------------Updated form values---------------"
+    );
+    console.log(updatedValues);
     setLoading(true);
     try {
       const data = await createCheckoutSession(
