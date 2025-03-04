@@ -18,7 +18,7 @@ const { Option } = Select;
 const { TabPane } = Tabs;
 
 const Orders = () => {
-  const [activeTab, setActiveTab] = useState("processing");
+  const [activeTab, setActiveTab] = useState("completed");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -46,12 +46,6 @@ const Orders = () => {
     }));
   };
 
-  useEffect(() => {
-    // Ensure filtering happens when orders are fetched or updated
-    const filtered = orders.filter((order) => order.status === activeTab);
-    setFilteredOrders(filtered);
-  }, [activeTab, orders]);
-
   const handleShowOrderDetailModal = (order) => {
     setSelectedOrder(order);
     setShowOrderDetailModal(true);
@@ -69,7 +63,7 @@ const Orders = () => {
 
       console.log(response.data);
       setOrders(response.data);
-      setFilteredOrders(response.data);
+      // setFilteredOrders(response.data);
       setPagination((prev) => ({
         ...prev,
         total: response.length,
@@ -103,7 +97,14 @@ const Orders = () => {
   useEffect(() => {
     fetchOrders();
     fetchDeletedOrders();
+    setActiveTab("completed");
   }, []);
+
+  useEffect(() => {
+    // Ensure filtering happens when orders are fetched or updated
+    const filtered = orders.filter((order) => order.status === activeTab);
+    setFilteredOrders(filtered);
+  }, [activeTab, orders]);
 
   const handleTableChange = (pagination, filters) => {
     setPagination({ ...pagination });
@@ -353,7 +354,7 @@ const Orders = () => {
           <Option value="US">United States</Option>
         </Select>
       </div>
-      <Tabs defaultActiveKey="processing" onChange={handleTabChange}>
+      <Tabs defaultActiveKey="completed" onChange={handleTabChange}>
         <TabPane tab="Completed" key="completed" />
         <TabPane tab="Awaiting Payment" key="awaiting_payment" />
         <TabPane tab="Delivered" key="delivered" />
@@ -372,7 +373,13 @@ const Orders = () => {
       )}
       <Table
         columns={columns}
-        dataSource={activeTab === "trash" ? deletedOrders : filteredOrders}
+        dataSource={
+          activeTab === "trash"
+            ? deletedOrders
+            : filteredOrders
+            ? filteredOrders
+            : []
+        }
         onChange={handleTableChange}
         pagination={{
           current: pagination.current,
