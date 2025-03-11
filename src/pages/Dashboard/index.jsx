@@ -1,6 +1,9 @@
 import {
+  CheckCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  PlusOutlined,
+  ShoppingCartOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import {
@@ -45,6 +48,14 @@ const Dashboard = () => {
   const usdOrders = orders
     .filter((order) => order.userDetails.country === "US")
     .filter((order) => order.status === "completed").length;
+
+  // Handle new orders and delivered orders
+  const newOrders = orders?.filter(
+    (order) => order.status === "completed"
+  ).length;
+  const deliveredOrders = orders?.filter(
+    (order) => order.status === "delivered"
+  ).length;
 
   const handleBeforeUpload = (file) => {
     const url = URL.createObjectURL(file);
@@ -324,6 +335,37 @@ const Dashboard = () => {
                 </p>
               </div>
               <Wallet className="text-[#ff0000]" />
+            </div>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* New Oders sections */}
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12} md={8} lg={8}>
+          <Card className="shadow-md">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-md font-semibold">New Orders</h2>
+                <p className="text-gray-500 text-3xl">{newOrders}</p>
+              </div>
+              <ShoppingCartOutlined
+                style={{ fontSize: "32px", color: "#1890ff" }}
+              />
+            </div>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={8} lg={8}>
+          <Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-md font-semibold">Delivered Orders</h2>
+                <p className="text-gray-500 text-3xl">{deliveredOrders}</p>
+              </div>
+              <CheckCircleOutlined
+                style={{ fontSize: "32px", color: "#52c41a" }}
+              />
             </div>
           </Card>
         </Col>
