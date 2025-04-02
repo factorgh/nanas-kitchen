@@ -35,7 +35,7 @@ const ProductCard = ({ product, handleAddToCart }) => {
 
   const handleGoToDetail = () => {
     // Navigate to product detail page
-    navigate(`/product-detail/${product._id}`);
+    navigate(`/product-detail/${product._id}`, { state: { product } });
   };
 
   const buttonClass = `${color} text-white p-4 mt-3 w-48 rounded-lg`;

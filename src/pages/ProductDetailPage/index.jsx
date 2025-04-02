@@ -1,7 +1,7 @@
 import { Button, Divider, Input, message, Rate, Spin } from "antd";
 import { ArrowLeft } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import ReviewSlider from "../../components/ReviewsSlider";
 import { CountryContext } from "../../context/country-context";
 import { getProductById } from "../../services/product-service";
@@ -9,6 +9,10 @@ import { addReview, getProductReviews } from "../../services/review-services";
 import { formatCurrency } from "../../utils/currency-formatter";
 import { addToCart, clearCart } from "../../store/slices/cartSlice";
 import { useDispatch } from "react-redux";
+import {
+  addToDollarCart,
+  clearDollarCart,
+} from "../../store/slices/dollarSlice";
 
 export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState("");
@@ -26,6 +30,8 @@ export default function ProductDetailPage() {
   const params = useParams();
   const productId = params.id;
   const dispatch = useDispatch();
+  const location = useLocation();
+  const originalProduct = location.state?.product;
 
   useEffect(() => {
     async function fetchData() {
@@ -85,6 +91,7 @@ export default function ProductDetailPage() {
     window.scrollTo(0, 0); //
   };
   const handleDollarAddToCart = (product) => {
+    console.log(product);
     dispatch(clearDollarCart());
     console.log(product);
     const newProduct = {
@@ -213,11 +220,10 @@ export default function ProductDetailPage() {
             <Button
               type="primary"
               className="w-full py-5 text-lg bg-[#AF1313]"
-              onClick={() =>
-                userCountry === "GHANA"
-                  ? handleAddToCart(selectedProduct)
-                  : handleDollarAddToCart(selectedProduct)
-              }
+              onClick={() => {
+                handleAddToCart(originalProduct);
+                handleDollarAddToCart(originalProduct);
+              }}
             >
               Add to Cart
             </Button>
