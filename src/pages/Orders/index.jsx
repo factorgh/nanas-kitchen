@@ -198,21 +198,25 @@ const Orders = () => {
         return (
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             {/* {location} */}
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(location);
-                notification.success({ message: "Copied to Clipboard" });
-              }}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-              }}
-              title="Copy Location"
-            >
-              <Copy size={16} color="#007bff" />
-            </button>
+            {record.userDetails?.country === "GH" ? (
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(location);
+                  notification.success({ message: "Copied to Clipboard" });
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+                title="Copy Location"
+              >
+                <Copy size={16} color="#007bff" />
+              </button>
+            ) : (
+              "N/A"
+            )}
           </div>
         );
       },
