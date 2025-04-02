@@ -26,15 +26,15 @@ const Header = () => {
 
   return (
     <div className="bg-[#AF1313] h-28">
-      <div className="container mx-auto flex items-center justify-between px-5 lg:px-20 py-10">
+      <div className="container mx-auto flex items-center justify-between px-5 lg:px-20 ">
         {/* Logo */}
         <Link to="/">
-          {/* <img
+          <img
             src="/nana-logo.png"
             alt="nana-logo"
             className="md:h-16 md:w-28 my-5 h-15 w-32"
-          /> */}
-          <h1 className="text-white text-2xl font-bold ">NANA SHITO</h1>
+          />
+          {/* <h1 className="text-white text-2xl font-bold ">NANA SHITO</h1> */}
         </Link>
 
         {/* Desktop Menu */}

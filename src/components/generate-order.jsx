@@ -2,6 +2,7 @@
 import moment from "moment";
 
 export const GenerateOrderModal = ({ order }) => {
+  console.log(order);
   const subtotal = order.cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
@@ -101,7 +102,7 @@ export const GenerateOrderModal = ({ order }) => {
                     border: "1px solid #ddd",
                   }}
                 >
-                  Price (GHC)
+                  Price( {order.userDetails.country !== "GH" ? "$" : "   GHC"} )
                 </th>
               </tr>
             </thead>
@@ -142,21 +143,26 @@ export const GenerateOrderModal = ({ order }) => {
                   Subtotal:
                 </td>
                 <td style={{ textAlign: "right", padding: "8px 0" }}>
-                  GHC {subtotal.toFixed(2)}
+                  {order.userDetails.country !== "GH" ? "$" : "   GHC"}{" "}
+                  {subtotal.toFixed(2)}
                 </td>
               </tr>
               <tr>
                 <td style={{ padding: "8px 0", textAlign: "right" }}>
-                  Delivery Fee:
+                  {order.userDetails.country !== "GH"
+                    ? "Shipping Cost:"
+                    : "Delivery Fee:"}{" "}
                 </td>
                 <td style={{ textAlign: "right", padding: "8px 0" }}>
-                  GHC {calculatedDeliveryPrice.toFixed(2)}
+                  {order.userDetails.country !== "GH" ? "$" : "   GHC"}{" "}
+                  {calculatedDeliveryPrice.toFixed(2)}
                 </td>
               </tr>
               <tr style={{ fontWeight: "bold" }}>
                 <td style={{ padding: "8px 0", textAlign: "right" }}>Total:</td>
                 <td style={{ textAlign: "right", padding: "8px 0" }}>
-                  GHC {order.totalAmount.toFixed(2)}
+                  {order.userDetails.country !== "GH" ? "$" : "   GHC"}{" "}
+                  {order.totalAmount.toFixed(2)}
                 </td>
               </tr>
             </tbody>
@@ -166,7 +172,7 @@ export const GenerateOrderModal = ({ order }) => {
         {/* Delivery Details */}
         <div style={{ backgroundColor: "#f9f9f9", padding: "20px" }}>
           <h3 style={{ color: "#333", marginBottom: "10px" }}>
-            Delivery Details
+            <strong> Delivery Details</strong>
           </h3>
           <p style={{ fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
             <strong>Address:</strong> {order.userDetails?.address || "N/A"}

@@ -231,7 +231,7 @@ const Orders = () => {
       render: (_, record) =>
         record.userDetails?.country === "GH"
           ? "Ghana"
-          : record.userDetails?.country === "USA"
+          : record.userDetails?.country === "US"
           ? "USA"
           : "Unknown Country",
     },

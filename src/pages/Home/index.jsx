@@ -24,6 +24,21 @@ const HomePage = () => {
 
   console.log(userCountry);
 
+  // Scroll to id on mount
+  useEffect(() => {
+    const id = sessionStorage.getItem("scrollToId");
+    if (id) {
+      setTimeout(() => {
+        const section = document.getElementById(id);
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 1000); // Delay to ensure the DOM has loaded
+
+      // sessionStorage.removeItem("scrollToId"); // Remove after use
+    }
+  }, []);
+
   // Get all products
   useEffect(() => {
     const getProducts = async () => {
@@ -141,7 +156,10 @@ const HomePage = () => {
             </h1>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div
+            id="products"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
             {products.map((product) => (
               <ProductCard
                 handleAddToCart={() => {

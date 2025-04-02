@@ -7,6 +7,8 @@ import { CountryContext } from "../../context/country-context";
 import { getProductById } from "../../services/product-service";
 import { addReview, getProductReviews } from "../../services/review-services";
 import { formatCurrency } from "../../utils/currency-formatter";
+import { addToCart, clearCart } from "../../store/slices/cartSlice";
+import { useDispatch } from "react-redux";
 
 export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState("");
@@ -23,6 +25,7 @@ export default function ProductDetailPage() {
   const navigate = useNavigate();
   const params = useParams();
   const productId = params.id;
+  const dispatch = useDispatch();
 
   useEffect(() => {
     async function fetchData() {
@@ -57,6 +60,53 @@ export default function ProductDetailPage() {
     }
     getProductReviewsByProductId();
   }, [productId, reviews.length]);
+
+  const handleAddToCart = (product) => {
+    dispatch(clearCart());
+    console.log(product);
+    const newProduct = {
+      id: product._id,
+      title: product.title,
+      image: product.image,
+      price: product.cediDiscount,
+      quantity: 1,
+      totalPrice: product.cediDiscount,
+      weight: product.weight,
+      height: product.height,
+      length: product.length,
+      width: product.width,
+    };
+
+    // Add to cart
+    dispatch(addToCart(newProduct));
+
+    // Navigate to check out page
+    navigate("/checkout");
+    window.scrollTo(0, 0); //
+  };
+  const handleDollarAddToCart = (product) => {
+    dispatch(clearDollarCart());
+    console.log(product);
+    const newProduct = {
+      id: product._id,
+      title: product.title,
+      image: product.image,
+      price: product.dollarDiscount,
+      quantity: 1,
+      totalPrice: product.dollarDiscount,
+      weight: product.weight,
+      height: product.height,
+      length: product.length,
+      width: product.width,
+    };
+
+    // Add to cart
+    dispatch(addToDollarCart(newProduct));
+
+    // Navigate to check out page
+    navigate("/checkout");
+    window.scrollTo(0, 0); //
+  };
 
   const handleReviewSubmit = async () => {
     if (!reviewerName.trim() || !reviewComment.trim()) {
@@ -98,7 +148,10 @@ export default function ProductDetailPage() {
     <div className="container mx-auto p-6 max-w-6xl">
       <h1
         className="text-md font-bold text-gray-800 mb-4 flex items-center gap-2 cursor-pointer hover:text-red-500"
-        onClick={() => navigate(-1)}
+        onClick={() => {
+          sessionStorage.setItem("scrollToId", "products"); // Store the ID
+          navigate(-1);
+        }}
       >
         <ArrowLeft className="text-sm text-red-500" />
         <span>Back</span>
@@ -156,7 +209,22 @@ export default function ProductDetailPage() {
             <li>Authentic Ghanaian taste</li>
             <li>Perfect for rice, kenkey, and more</li>
           </ul>
+          <div className="flex justify-center gap-4 mt-10">
+            <Button
+              type="primary"
+              className="w-full py-5 text-lg bg-[#AF1313]"
+              onClick={() =>
+                userCountry === "GHANA"
+                  ? handleAddToCart(selectedProduct)
+                  : handleDollarAddToCart(selectedProduct)
+              }
+            >
+              Add to Cart
+            </Button>
+          </div>
         </div>
+
+        {/* Add to cart button section */}
       </div>
 
       {/* Reviews Section */}
@@ -189,7 +257,7 @@ export default function ProductDetailPage() {
           />
           <Button
             type="primary"
-            className="mt-4 w-full py-2 text-lg"
+            className="mt-4 w-full py-5 text-lg bg-[#AF1313]"
             onClick={handleReviewSubmit}
           >
             {submittingReview ? "Submitting ..." : "Submit Review"}

@@ -11,7 +11,7 @@ export const createCheckoutSession = async (
   userDetails,
   totalPrice
 ) => {
-  console.log(cartItems, userDetails);
+  console.log(cartItems, userDetails, totalPrice);
   try {
     const response = await axiosInstance.post(
       "/orders/checkout/create-checkout-session",

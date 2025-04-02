@@ -507,10 +507,11 @@ const CheckoutPage = () => {
       "----------------------------------------------------------------Updated form values---------------"
     );
     console.log(updatedValues);
+    console.log(calculateStripeTotal);
     setLoading(true);
     try {
       const data = await createCheckoutSession(
-        cartItems,
+        dollarCartItems,
         updatedValues,
         calculateStripeTotal
       );
@@ -656,16 +657,32 @@ const CheckoutPage = () => {
                 {userCountry !== "GHANA" && (
                   <Col span={12}>
                     <Form.Item
-                      label="State / City"
+                      label="State"
                       rules={[
                         { required: true, message: "This field is required" },
                       ]}
                       name="state"
                     >
-                      <Input placeholder="Enter your state or city" />
+                      <Input placeholder="Enter your state " />
                     </Form.Item>
                   </Col>
                 )}
+                {userCountry !== "GHANA" && (
+                  <Col span={12}>
+                    <Form.Item
+                      label="City"
+                      rules={[
+                        { required: true, message: "This field is required" },
+                      ]}
+                      name="city"
+                    >
+                      <Input placeholder="Enter your city" />
+                    </Form.Item>
+                  </Col>
+                )}
+              </Row>
+
+              <Row gutter={16}>
                 {userCountry !== "GHANA" && (
                   <Col span={12}>
                     <Form.Item

@@ -3,16 +3,16 @@ import { Link } from "react-router-dom";
 const Footer = () => {
   return (
     <div className="bg-[#AF1313] h-auto py-10">
-      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between px-5 md:px-20">
+      <div className="container  flex flex-col md:flex-row items-center justify-between px-5 md:px-20">
         {/* Logo and Description */}
-        <div className="mb-8 md:mb-0">
+        <div className="mb-8 md:mb-0 flex flex-col items-center justify-center ">
           <Link to="/">
-            {/* <img
-            src="/nana-logo.png"
-            alt="nana-logo"
-            className="md:h-16 md:w-28 my-5 h-15 w-32"
-          /> */}
-            <h1 className="text-white text-5xl font-bold mb-3 ">NANA SHITO</h1>
+            <img
+              src="/nana-logo.png"
+              alt="nana-logo"
+              className="md:h-16 md:w-28 my-5 h-15 w-32"
+            />
+            {/* <h1 className="text-white text-5xl font-bold mb-3 ">NANA SHITO</h1> */}
           </Link>
           <p className="text-white text-center md:text-left">
             ... an extension of your kitchen.
@@ -20,7 +20,7 @@ const Footer = () => {
         </div>
 
         {/* Contact Information */}
-        <div className="flex flex-col items-center text-center ml-5">
+        <div className="flex flex-col items-center text-center ml-3">
           <h3 className="text-xl md:text-2xl font-bold text-white mb-3">
             CONTACT INFO
           </h3>
