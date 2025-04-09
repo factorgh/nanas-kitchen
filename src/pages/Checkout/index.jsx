@@ -76,7 +76,6 @@ const CheckoutPage = () => {
   const [isShppingRateEmpty, setIsShppingRateEmpty] = useState(false);
   const [isGeoEnabled, setIsGeoEnabled] = useState(false);
   const [showStripe, setShowStripe] = useState(false);
-  const [userData, setUserData] = useState({});
 
   const [currentLocation, setCurrentLocation] = useState("");
   const [deliveryFee, setDeliveryFee] = useState(0);
@@ -105,6 +104,7 @@ const CheckoutPage = () => {
         const parsedData = JSON.parse(savedData);
 
         // Step 2: Set form fields with parsed data
+        setPostalCode(parsedData.zip);
         form.setFieldsValue(parsedData);
       } catch (error) {
         console.error("Error parsing form data from localStorage", error);
@@ -226,9 +226,9 @@ const CheckoutPage = () => {
     };
 
     console.log("Form values after processing:", updatedValues);
-    const removedZip = { ...updatedValues, zip: "" };
+
     // const convertedPrice = Math.round(calculatedTotalPrice);
-    localStorage.setItem("formData", JSON.stringify(removedZip));
+    localStorage.setItem("formData", JSON.stringify(updatedValues));
 
     await formRef.current.validateFields();
 
