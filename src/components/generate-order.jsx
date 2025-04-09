@@ -175,6 +175,9 @@ export const GenerateOrderModal = ({ order }) => {
             <strong> Delivery Details</strong>
           </h3>
           <p style={{ fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+            <strong>Email:</strong> {order.userDetails?.email || "N/A"}
+          </p>
+          <p style={{ fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
             <strong>Address:</strong> {order.userDetails?.address || "N/A"}
             <br />
             <strong>Phone:</strong> {order.userDetails?.phone || "N/A"}
