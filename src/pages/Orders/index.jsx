@@ -233,11 +233,7 @@ const Orders = () => {
       dataIndex: "country",
       key: "country",
       render: (_, record) =>
-        record.userDetails?.country === "GH"
-          ? "Ghana"
-          : record.userDetails?.country === "US"
-          ? "USA"
-          : "Unknown Country",
+        record.userDetails?.country === "GH" ? "Ghana" : "USA",
     },
 
     ...(activeTab !== "trash"

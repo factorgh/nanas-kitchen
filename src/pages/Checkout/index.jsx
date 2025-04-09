@@ -75,6 +75,8 @@ const CheckoutPage = () => {
   const [savedCT, setSavedCT] = useState([]);
   const [isShppingRateEmpty, setIsShppingRateEmpty] = useState(false);
   const [isGeoEnabled, setIsGeoEnabled] = useState(false);
+  const [showStripe, setShowStripe] = useState(false);
+  const [userData, setUserData] = useState({});
 
   const [currentLocation, setCurrentLocation] = useState("");
   const [deliveryFee, setDeliveryFee] = useState(0);
@@ -93,6 +95,22 @@ const CheckoutPage = () => {
   console.log("All update Cart Items", updatedCartItems);
   const [products, setProducts] = useState([]);
   const [paystackLoading, setPaystackLoading] = useState(false);
+
+  useEffect(() => {
+    // Step 1: Get saved data from localStorage
+    const savedData = localStorage.getItem("formData");
+
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+
+        // Step 2: Set form fields with parsed data
+        form.setFieldsValue(parsedData);
+      } catch (error) {
+        console.error("Error parsing form data from localStorage", error);
+      }
+    }
+  }, [form]);
 
   // Get products
   useEffect(() => {
@@ -208,7 +226,9 @@ const CheckoutPage = () => {
     };
 
     console.log("Form values after processing:", updatedValues);
+    const removedZip = { ...updatedValues, zip: "" };
     // const convertedPrice = Math.round(calculatedTotalPrice);
+    localStorage.setItem("formData", JSON.stringify(removedZip));
 
     await formRef.current.validateFields();
 
@@ -516,8 +536,8 @@ const CheckoutPage = () => {
         calculateStripeTotal
       );
       // Redirect to Stripe checkout URL
-      // window.location.href = data.url;
-      window.open(data.url, "_blank", "noopener,noreferrer");
+      window.location.href = data.url;
+      // window.open(data.url, "_blank", "noopener,noreferrer");
     } catch (error) {
       message.error("An error occurred!. Please try again later");
       // message.error(error.response.data.error);
