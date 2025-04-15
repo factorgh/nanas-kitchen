@@ -183,9 +183,17 @@ export const GenerateOrderModal = ({ order }) => {
             <strong>Phone:</strong> {order.userDetails?.phone || "N/A"}
           </p>
           {order.userDetails?.country !== "GH" && (
-            <p style={{ fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
-              <strong>Zip:</strong> {order.userDetails?.zip || "N/A"}
-            </p>
+            <>
+              <p style={{ fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+                <strong>City:</strong> {order.userDetails?.city || "N/A"}
+              </p>
+              <p style={{ fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+                <strong>State:</strong> {order.userDetails?.state || "N/A"}
+              </p>
+              <p style={{ fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+                <strong>Zip:</strong> {order.userDetails?.zip || "N/A"}
+              </p>
+            </>
           )}
         </div>
 

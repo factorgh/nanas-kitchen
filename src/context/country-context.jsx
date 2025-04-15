@@ -22,6 +22,7 @@ export const CountryProvider = ({ children }) => {
         try {
           const response = await fetch("https://ipapi.co/json/");
           const data = await response.json();
+          console.log(data);
           const country = data.country_name.toUpperCase();
           setUserCountry(country);
           // Save to localStorage

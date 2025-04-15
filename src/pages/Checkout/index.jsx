@@ -220,7 +220,7 @@ const CheckoutPage = () => {
     const formattedLocation = `https://www.google.com/maps?q=${coLocation.lat},${coLocation.lng}`;
     const updatedValues = {
       ...values,
-      country: countryCode,
+      country: userCountry !== "GHANA" ? "US" : "GH",
       location: formattedLocation,
       zip: userCountry === "GHANA" ? "35006" : values.zip,
     };
