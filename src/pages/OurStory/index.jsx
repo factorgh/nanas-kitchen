@@ -1,6 +1,12 @@
+import { useNavigate } from "react-router-dom";
 import Wrapper from "../../components/wrapper";
 
 const OurStoryPage = () => {
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate("/");
+  };
   return (
     <Wrapper>
       {/* Hero Section */}
@@ -62,6 +68,12 @@ const OurStoryPage = () => {
           From humble beginnings of making free shito for a military friend on
           deployment, to serving hundreds of others through recommendations and
           word of mouth, we bring you a magic sauce that keeps giving.
+          <span
+            className="italic text-blue-500 cursor-pointer ml-3"
+            onClick={handleGoBack}
+          >
+            Try It Now !!!
+          </span>
         </p>
       </div>
     </Wrapper>
