@@ -24,10 +24,10 @@ const OurStoryPage = () => {
           with its cocktail of herbs and spices and juices that leave a
           lingering taste many hours after we are done eating. Food is life and
           it must be enjoyed, it brings health and it also brings joy… this is
-          the story of Nana’s Kitchen.
+          the story of Nana Shito.
         </p>
         <p className="tracking-widest text-sm sm:text-base leading-relaxed">
-          Nana’s Kitchen is a homemade food business located in Texas, that is
+          Nana Shito is a homemade food business located in Texas, that is
           happy to bring you delicious Ghanaian-style homemade food that truly
           brings you joy. For Ghanaians living in Texas, this affords you the
           opportunity to enjoy the meals you loved back home in the flavors you
@@ -35,7 +35,7 @@ const OurStoryPage = () => {
           teary and your lips on fire, the smooth okro soup that glides
           skillfully down into your belly and that peanut butter (groundnut)
           soup that is full of flavor to carry your fufu all the way. For
-          non-Ghanaians who wish to swim in this same excitement, Nana’s Kitchen
+          non-Ghanaians who wish to swim in this same excitement, Nana Shito
           is your source for the sauce! Checkout{" "}
           <span className="font-bold">our Masukor Menu</span> to place an order
           for homemade food, made in sizable servings to last you several days.
@@ -46,7 +46,7 @@ const OurStoryPage = () => {
         <p className="tracking-widest text-sm sm:text-base leading-relaxed">
           We have taken centuries-old recipes and lots of feedback over the
           years to create formulas that will indeed keep you wanting more, and
-          among these is the crown jewel of our operations, the Nana’s Kitchen
+          among these is the crown jewel of our operations, the Nana Shito
           Shito (pronounced SHI-tor).
         </p>
         <p className="tracking-widest text-sm sm:text-base leading-relaxed">
