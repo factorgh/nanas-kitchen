@@ -47,10 +47,10 @@ const Footer = () => {
 
             {/* Email */}
             <a
-              href="mailto:chef@nanaskitchen.net"
+              href="mailto:info@nanaskitchen.net"
               className="text-sm md:text-base hover:underline"
             >
-              chef@nanaskitchen.net
+              info@nanakitchen.com
             </a>
 
             {/* Location */}
