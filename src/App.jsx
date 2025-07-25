@@ -12,9 +12,39 @@ import ProductPage from "./pages/Product";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import AdminReviewsPage from "./pages/Reviews";
 import SuccessPage from "./pages/Success";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { setStoreConfig } from "./store/slices/storeConfigSlice";
 
 const App = () => {
+  const dispatch = useDispatch();
+
   const BASE_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    const hostname = window.location.hostname;
+    const configMap = {
+      "nanashito.com": {
+        domain: "nanahito.com",
+        storeName: "Nana Shito",
+        storeId: "shito-001",
+      },
+      "nanaskitchen.net": {
+        domain: "nanaskitchen.net",
+        storeName: "Nana's Kitchen",
+        storeId: "kitchen-002",
+      },
+    };
+
+    const matched = configMap[hostname] || {
+      domain: hostname,
+      storeName: "Nana Shito",
+      storeId: "default-000",
+    };
+
+    dispatch(setStoreConfig(matched));
+  }, [dispatch]);
+
   navigator.serviceWorker.addEventListener("message", () => {
     let count = localStorage.getItem("notifCount") || 0;
     count++;
@@ -61,6 +91,7 @@ const App = () => {
 
   // Convert VAPID key
   function urlBase64ToUint8Array(base64String) {
+    console.log(base64String);
     const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding)
       .replace(/-/g, "+")

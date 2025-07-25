@@ -3,10 +3,12 @@ import { Button, Divider, Drawer, Select } from "antd";
 import { useContext, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { CountryContext } from "../context/country-context";
+import { useSelector } from "react-redux";
 
 const Header = () => {
   const location = useLocation();
   const { Option } = Select;
+  const storeConfig = useSelector((state) => state.storeConfig);
 
   const { userCountry, changeCountry } = useContext(CountryContext);
   // const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -29,12 +31,17 @@ const Header = () => {
       <div className="container mx-auto flex items-center justify-between px-5 lg:px-20 py-5">
         {/* Logo */}
         <Link to="/">
-          {/* <img
-            src="/nana-logo.png"
-            alt="nana-logo"
-            className="md:h-16 md:w-28 my-5 h-15 w-32"
-          /> */}
-          <h1 className="text-white text-2xl font-bold my-5 ">NANA SHITO</h1>
+          {storeConfig?.storeName === "NANA'S KITCHEN" ? (
+            <img
+              src="/nana-logo.png"
+              alt="nana-logo"
+              className="md:h-16 md:w-28 my-5 h-15 w-32"
+            />
+          ) : (
+            <h1 className="text-white text-2xl font-bold my-5">
+              {storeConfig?.storeName || "Default Store"}
+            </h1>
+          )}
         </Link>
 
         {/* Desktop Menu */}

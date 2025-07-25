@@ -46,6 +46,7 @@ import {
   calculateDimensions,
   calculateWeight,
   fetchShippingRate,
+  fetchShippoRates,
 } from "../../utils/ship-station";
 
 const CheckoutPage = () => {
@@ -76,6 +77,18 @@ const CheckoutPage = () => {
   const [isShppingRateEmpty, setIsShppingRateEmpty] = useState(false);
   const [isGeoEnabled, setIsGeoEnabled] = useState(false);
   const [showStripe, setShowStripe] = useState(false);
+  const [isValidZip, setIsValidZip] = useState(true);
+
+  const [userData, setUserData] = useState({
+    firsName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    street: "",
+    city: "",
+    state: "",
+    zip: "",
+  });
 
   const [currentLocation, setCurrentLocation] = useState("");
   const [deliveryFee, setDeliveryFee] = useState(0);
@@ -94,6 +107,7 @@ const CheckoutPage = () => {
   console.log("All update Cart Items", updatedCartItems);
   const [products, setProducts] = useState([]);
   const [paystackLoading, setPaystackLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Step 1: Get saved data from localStorage
@@ -125,22 +139,45 @@ const CheckoutPage = () => {
     form.setFieldsValue({ country: userCountry });
   }, [userCountry, form]);
 
+  // UseEffect that gets shipping cost
   useEffect(() => {
     const updateShippingCost = async () => {
       if (!postalCode || updatedCartItems.length === 0) return;
 
       setIsLoadingShippingCost(true);
-      const weight = calculateWeight(updatedCartItems);
-      const dimensions = calculateDimensions(updatedCartItems);
+      // const weight = calculateWeight(updatedCartItems);
+      // const dimensions = calculateDimensions(updatedCartItems);
+      const userData = {
+        zip: postalCode,
+        country: userCountry,
+        name:
+          form.getFieldValue("firstName") +
+          " " +
+          form.getFieldValue("lastName"),
+        email: form.getFieldValue("email"),
+        phone: form.getFieldValue("phone"),
+        street: form.getFieldValue("address"),
+        city: form.getFieldValue("city"),
+        state: form.getFieldValue("state"),
+        country: userCountry,
+      };
+
+      // Check it a valid usa zip
+      const res = await fetch("http://api.zippopotam.us/us/" + postalCode);
+      if (res.status === 404) {
+        setIsValidZip(false);
+        setError("Invalid Zip Code .Please enter a valid US zip code.");
+        return;
+      } else {
+        setIsValidZip(true);
+      }
 
       try {
-        const cost = await fetchShippingRate(
-          weight,
-          dimensions,
-          "US",
-          postalCode
+        const cost = await fetchShippoRates(userData, userCountry, cartItems);
+        console.log(
+          "-----------------------------shipping rate status------------------------------",
+          cost
         );
-        console.log("Shipping rate status");
         console.log(cost);
         if (cost === 0) {
           setIsShppingRateEmpty(true);
@@ -159,32 +196,32 @@ const CheckoutPage = () => {
     updateShippingCost();
   }, [updatedCartItems, postalCode]);
 
-  useEffect(() => {
-    const checkShipServices = async () => {
-      try {
-        const res = await getCarriersCode();
+  // useEffect(() => {
+  //   const checkShipServices = async () => {
+  //     try {
+  //       const res = await getCarriersCode();
 
-        const filteredServices = res.filter((service) => {
-          // Replace the condition below with your logic for selecting items
-          return (
-            service.code === "usps_ground_advantage" ||
-            service.code === "globalpost_economy" ||
-            service.code === "globalpost_priority" ||
-            service.code === "gp_plus" ||
-            service.code === "globalpost_parcel_select_smart_saver"
-          );
-        });
+  //       const filteredServices = res.filter((service) => {
+  //         // Replace the condition below with your logic for selecting items
+  //         return (
+  //           service.code === "usps_ground_advantage" ||
+  //           service.code === "globalpost_economy" ||
+  //           service.code === "globalpost_priority" ||
+  //           service.code === "gp_plus" ||
+  //           service.code === "globalpost_parcel_select_smart_saver"
+  //         );
+  //       });
 
-        console.log("Filtered Services:", filteredServices);
+  //       console.log("Filtered Services:", filteredServices);
 
-        console.log(res);
-      } catch (error) {
-        console.error("Failed to update shipping services:", error);
-      }
-    };
+  //       console.log(res);
+  //     } catch (error) {
+  //       console.error("Failed to update shipping services:", error);
+  //     }
+  //   };
 
-    checkShipServices();
-  }, []);
+  //   checkShipServices();
+  // }, []);
 
   const mapCountryToCode = (country) => {
     const countryMapping = {
@@ -315,83 +352,6 @@ const CheckoutPage = () => {
       ))}
     </div>
   );
-
-  // Handle geolocation retrieval
-  // const handleGeolocation = () => {
-  //   if (navigator.geolocation) {
-  //     navigator.geolocation.getCurrentPosition(
-  //       (position) => {
-  //         const { latitude, longitude } = position.coords;
-  //         const locationString = `Lat: ${latitude}, Lng: ${longitude}`;
-
-  //         // Set geolocation as form value
-  //         form.setFieldsValue({ location: locationString });
-  //         notification.success({ message: "Location set successfully!" });
-  //       },
-  //       (error) => {
-  //         notification.error({
-  //           message: "Error getting location",
-  //           description: error.message,
-  //         });
-  //       }
-  //     );
-  //   } else {
-  //     notification.error({
-  //       message: "Geolocation not supported",
-  //       description: "Your browser does not support geolocation.",
-  //     });
-  //   }
-  // };
-
-  // Handle geolocation retrieval
-  // const handleGeolocation = () => {
-  //   if (navigator.geolocation) {
-  //     setLoading(false);
-  //     navigator.geolocation.getCurrentPosition(
-  //       async (position) => {
-  //         const { latitude, longitude } = position.coords;
-  //         console.log(
-  //           "-------------------------------------Postion on google maps",
-  //           latitude,
-  //           longitude
-  //         );
-
-  //         // Update the location state
-  //         setCoLocation((prev) => ({
-  //           ...prev,
-  //           lat: latitude,
-  //           lng: longitude,
-  //         }));
-  //         try {
-  //           const address = await getHumanReadableLocation(latitude, longitude);
-  //           const deliverycost = deriveDeliveryRate(address);
-  //           setDeliveryFee(deliverycost);
-
-  //           // form.setFieldsValue({ location: address });
-  //           setConvertedAddress(address);
-  //           // notification.success({ message: "Location set successfully!" });
-  //         } catch (error) {
-  //           console.log(error);
-  //           // Already handled in getHumanReadableLocation
-  //         } finally {
-  //           setLoading(false);
-  //         }
-  //       },
-  //       (error) => {
-  //         setLoading(false);
-  //         notification.error({
-  //           message: "Error getting location",
-  //           description: error.message,
-  //         });
-  //       }
-  //     );
-  //   } else {
-  //     notification.error({
-  //       message: "Geolocation not supported",
-  //       description: "Your browser does not support geolocation.",
-  //     });
-  //   }
-  // };
 
   const handleCheckboxChange = (e) => {
     const checked = e.target.checked;
@@ -603,7 +563,15 @@ const CheckoutPage = () => {
                     ]}
                     name="firstName"
                   >
-                    <Input placeholder="Enter your first name" />
+                    <Input
+                      onInput={(e) =>
+                        setUserData({ ...userData, email: e.target.value })
+                      } // Capture autofill
+                      onBlur={(e) =>
+                        setUserData({ ...userData, email: e.target.value })
+                      } // Fallback for unfocus
+                      placeholder="Enter your first name"
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -640,7 +608,15 @@ const CheckoutPage = () => {
                     ]}
                     name="email"
                   >
-                    <Input placeholder="Enter your email" />
+                    <Input
+                      onInput={(e) =>
+                        setUserData({ ...userData, email: e.target.value })
+                      } // Capture autofill
+                      onBlur={(e) =>
+                        setUserData({ ...userData, email: e.target.value })
+                      } // Fallback for unfocus
+                      placeholder="Enter your email"
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -651,7 +627,15 @@ const CheckoutPage = () => {
                     label="Phone"
                     name="phone"
                   >
-                    <Input placeholder="Enter your phone number" />
+                    <Input
+                      onInput={(e) =>
+                        setUserData({ ...userData, phone: e.target.value })
+                      } // Capture autofill
+                      onBlur={(e) =>
+                        setUserData({ ...userData, phone: e.target.value })
+                      } // Fallback for unfocus
+                      placeholder="Enter your phone number"
+                    />
                   </Form.Item>
                 </Col>
                 {userCountry !== "GHANA" && (
@@ -664,6 +648,12 @@ const CheckoutPage = () => {
                       name="address"
                     >
                       <Input
+                        onInput={(e) =>
+                          setUserData({ ...userData, street: e.target.value })
+                        } // Capture autofill
+                        onBlur={(e) =>
+                          setUserData({ ...userData, street: e.target.value })
+                        } // Fallback for unfocus
                         placeholder="Enter your address"
                         rules={[
                           { required: true, message: "Field is required!" },
@@ -683,7 +673,15 @@ const CheckoutPage = () => {
                       ]}
                       name="state"
                     >
-                      <Input placeholder="Enter your state " />
+                      <Input
+                        onInput={(e) =>
+                          setUserData({ ...userData, state: e.target.value })
+                        } // Capture autofill
+                        onBlur={(e) =>
+                          setUserData({ ...userData, state: e.target.value })
+                        } // Fallback for unfocus
+                        placeholder="Enter your state "
+                      />
                     </Form.Item>
                   </Col>
                 )}
@@ -696,7 +694,15 @@ const CheckoutPage = () => {
                       ]}
                       name="city"
                     >
-                      <Input placeholder="Enter your city" />
+                      <Input
+                        onInput={(e) =>
+                          setUserData({ ...userData, city: e.target.value })
+                        } // Capture autofill
+                        onBlur={(e) =>
+                          setUserData({ ...userData, city: e.target.value })
+                        } // Fallback for unfocus
+                        placeholder="Enter your city"
+                      />
                     </Form.Item>
                   </Col>
                 )}
@@ -721,6 +727,18 @@ const CheckoutPage = () => {
                     {isShppingRateEmpty && (
                       <Alert
                         message="Please enter a valid zip code to place order"
+                        type="error"
+                        closable={{
+                          "aria-label": "close",
+                          closeIcon: <CloseSquareFilled />,
+                        }}
+                        onClose={onClose}
+                      />
+                    )}
+                    {!isValidZip && error && (
+                      <Alert
+                        className="my-2"
+                        message={error}
                         type="error"
                         closable={{
                           "aria-label": "close",
@@ -874,6 +892,8 @@ const CheckoutPage = () => {
                         userCountry !== "GHANA" ? "en-US" : "en-GH"
                       )}
                     </div>
+                  ) : !isValidZip ? (
+                    "Invalid Zip Code"
                   ) : (
                     <p>Shipping not available.</p>
                   )}
@@ -896,7 +916,9 @@ const CheckoutPage = () => {
                 loading={paystackLoading || loading}
                 type="primary"
                 htmlType="submit"
-                disabled={isLoadingShippingCost || shippingCost === 0}
+                disabled={
+                  isLoadingShippingCost || shippingCost === 0 || !isValidZip
+                }
                 className="w-full mt-5 bg-red-500"
               >
                 {isLoadingShippingCost ? "Calculating..." : "Place Order"}

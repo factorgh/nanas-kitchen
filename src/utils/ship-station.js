@@ -63,6 +63,56 @@ export const fetchShippingRate = async (
   }
 };
 
+export const fetchShippoRates = async (
+  userData,
+  userCountry,
+  updatedCartItems
+) => {
+  try {
+    console.log("Updated cart items:", updatedCartItems);
+    const payload = {
+      fromAddress: {
+        name: "Nana's Shito",
+        street1: "17850 W. GrandParkway",
+        city: "Los Angeles",
+        state: "TX",
+        zip: "77406",
+        country: "US",
+        phone: "+18322769667",
+        email: "chef@nanaskitchen.net",
+      },
+      toAddress: {
+        name: userData.name,
+        street1: userData.address,
+        city: userData.city,
+        state: userData.state,
+        zip: userData.zip,
+        country: userCountry,
+        phone: userData.phone,
+        email: userData.emai,
+      },
+      order: {
+        cartItems: updatedCartItems,
+      },
+    };
+
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL}/shippo/get-shipping-rates`,
+      payload
+    );
+
+    console.log(response.data);
+    const rates = response.data?.rates || [];
+    const groundRate = rates[0];
+    console.log(parseFloat(groundRate.amount));
+
+    return groundRate ? parseFloat(groundRate.amount) : 0;
+  } catch (error) {
+    console.error("Error fetching shipping rates:", error);
+    return 0;
+  }
+};
+
 export const calculateWeight = (cartItems) => {
   return cartItems.reduce(
     (totalWeight, item) => totalWeight + item.weight * item.quantity,

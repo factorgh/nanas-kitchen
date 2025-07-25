@@ -1,11 +1,12 @@
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, PrinterOutlined } from "@ant-design/icons";
 import { Button, Modal, notification, Select, Table, Tabs } from "antd";
-import { Copy } from "lucide-react";
+import { Copy, Loader2 } from "lucide-react";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import StatusDropdown from "../../components/StatusDropdown"; // Ensure this path is correct
 import { GenerateOrderModal } from "../../components/generate-order";
+
 import {
   deleteOrder,
   getAllOrders,
@@ -13,6 +14,7 @@ import {
   massDelete,
   updateOrderStatus,
 } from "../../services/order-service";
+import axios from "axios";
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -27,6 +29,7 @@ const Orders = () => {
   const [showOrderDetailModal, setShowOrderDetailModal] = useState(false); // Fixed initial state
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [deletedOrders, setDeletedOrders] = useState([]);
+  const [isLabelling, setIslabelling] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -54,6 +57,108 @@ const Orders = () => {
   const handleModalClose = () => {
     setShowOrderDetailModal(false);
     setSelectedOrder(null);
+  };
+
+  const getDimensionsByQuantity = (quantity) => {
+    if (quantity === 1) return { length: 8, width: 6, height: 4 };
+    if (quantity === 2) return { length: 12, width: 9, height: 6 };
+    if (quantity === 3) return { length: 12, width: 10, height: 8 };
+    if (quantity === 4) return { length: 19, width: 14, height: 17 };
+    if (quantity === 5) return { length: 10, width: 10, height: 10 };
+    return { length: 12, width: 12, height: 12 };
+  };
+
+  const generateLabels = async (order) => {
+    setIslabelling(true);
+    try {
+      const item = order.cartItems[0];
+      const totalQuanttiy = order.cartItems.reduce(
+        (total, item) => total + item.quantity,
+        0
+      );
+      const dimensions = getDimensionsByQuantity(totalQuanttiy);
+
+      const payload = {
+        orderId: order._id,
+        addressFrom: {
+          name: "Nana's Shito",
+          street1: "17850 W. GrandParkway",
+          city: "Los Angeles",
+          state: "TX",
+          zip: "77406",
+          country: "US",
+          phone: "+18322769667",
+          email: "chef@nanaskitchen.net",
+        },
+        addressTo: {
+          name: `${order.userDetails.firstName} ${order.userDetails.lastName}`,
+          company: "",
+          street1: order.userDetails.address,
+          city: order.userDetails.city,
+          state: order.userDetails.state,
+          zip: order.userDetails.zip,
+          country: "US",
+          phone: order.userDetails.phone,
+          email: order.userDetails.email,
+          metadata: "Nana's Shito",
+        },
+        parcel: {
+          length: dimensions.length.toString(),
+          width: dimensions.width.toString(),
+          height: dimensions.height.toString(),
+          distanceUnit: "in",
+          weight: "2",
+          massUnit: "lb",
+        },
+      };
+
+      setIslabelling(false);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/shippo/generate-label`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200 && response.data.labelUrl) {
+        Swal.fire({
+          icon: "success",
+          title: "Label generated!",
+          text: "Click below to view or download the shipping label.",
+          confirmButtonText: "Open Label",
+          showCancelButton: true,
+          cancelButtonText: "Close",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.open(response.data.labelUrl, "_blank");
+          }
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Label generation failed",
+          text:
+            response.data?.message ||
+            "Unable to generate label. Please try again.",
+        });
+      }
+    } catch (error) {
+      setIslabelling(false);
+      const errorMessage =
+        error.response?.data?.transaction?.messages?.[0]?.text ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error";
+
+      Swal.fire({
+        icon: "error",
+        title: "Error generating label",
+        text: errorMessage,
+      });
+    }
   };
 
   const fetchOrders = async () => {
@@ -276,11 +381,19 @@ const Orders = () => {
             dataIndex: "action",
             key: "action",
             render: (_, record) => (
-              <span>
+              <span className="flex gap-3 items-center">
+                {record.status === "completed" &&
+                  record.userDetails?.country !== "GH" &&
+                  (isLabelling ? (
+                    <Loader2 className="animate-spin text-green-600" />
+                  ) : (
+                    <PrinterOutlined
+                      className="text-green-600 cursor-pointer"
+                      onClick={async () => await generateLabels(record)}
+                    />
+                  ))}
                 <DeleteOutlined
-                  className="text-red-800"
-                  type="link"
-                  danger
+                  className="text-red-800 cursor-pointer"
                   onClick={() => handleDelete(record)}
                 />
               </span>
@@ -383,6 +496,7 @@ const Orders = () => {
         }}
         bordered
         loading={loading}
+        scroll={{ x: "100%" }}
       />
       {showOrderDetailModal && selectedOrder && (
         <Modal

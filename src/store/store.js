@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import cartReducer from "./slices/cartSlice.js";
 import dollarReducer from "./slices/dollarSlice.js";
+import storeConfigReducer from "./slices/storeConfigSlice.js";
 
 // import {
 //   loadDollarState,
@@ -19,6 +20,7 @@ const store = configureStore({
     // Define your reducers here
     cart: cartReducer,
     dollarCart: dollarReducer,
+    storeConfig: storeConfigReducer,
   },
   // preloadedState,
 });

@@ -2,23 +2,9 @@ import {
   CheckCircleOutlined,
   DeleteOutlined,
   EditOutlined,
-  PlusOutlined,
   ShoppingCartOutlined,
-  UploadOutlined,
 } from "@ant-design/icons";
-import {
-  Button,
-  Card,
-  Col,
-  Drawer,
-  Form,
-  Input,
-  message,
-  Row,
-  Select,
-  Table,
-  Upload,
-} from "antd";
+import { Button, Card, Col, Drawer, message, Row, Table } from "antd";
 import { DollarSign, Wallet } from "lucide-react"; // Specific icons from Lucide React
 import { useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
@@ -30,15 +16,16 @@ import {
   updateProductById,
 } from "../../services/product-service";
 import { formatCurrency } from "../../utils/currency-formatter";
+import ProductForm from "./productForm";
+import { useForm } from "react-hook-form";
 
 const Dashboard = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [form] = Form.useForm();
+  const form = useForm();
   const [productData, setProductData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const [selected, setSelected] = useState(null);
-  const formRef = useRef();
   const [imagePreview, setImagePreview] = useState(null);
 
   // Orders summary
@@ -84,14 +71,39 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (selected) {
-      formRef.current.setFieldsValue({ ...selected });
-      form.setFieldsValue({ assetImage: selected.image });
-      setImagePreview(selected.image || null);
+      console.log("Selected Item", selected);
+      const {
+        title,
+        dollarPrice,
+        cediPrice,
+        dollarDiscount,
+        cediDiscount,
+        length,
+        width,
+        height,
+        weight,
+        country,
+        image,
+      } = selected;
+      form.reset({
+        title,
+        dollarPrice,
+        cediPrice,
+        dollarDiscount,
+        cediDiscount,
+        length,
+        width,
+        height,
+        weight,
+        country,
+        assetImage: image, // or selected.assetImage if that's the correct field
+      });
+      setImagePreview(image || null);
     } else {
-      form.resetFields();
+      form.reset();
       setImagePreview(null);
     }
-  }, [form, selected]);
+  }, [selected, form]);
 
   useEffect(() => {
     const getOrders = async () => {
@@ -111,50 +123,43 @@ const Dashboard = () => {
   }, []);
 
   // Upload Image Function
-  const onFinish = async (values) => {
-    setLoading(true);
-    const formData = new FormData();
+  // const onFinish = async (values) => {
+  //   console.log(values)
+  //   setLoading(true);
+  //   const formData = new FormData();
 
-    // Add text fields to the form data
-    formData.append("title", values.title);
-    formData.append("dollarPrice", values.dollarPrice);
-    formData.append("cediPrice", values.cediPrice);
-    formData.append("dollarDiscount", values.dollarDiscount);
-    formData.append("cediDiscount", values.cediDiscount);
-    formData.append("length", values.length);
-    formData.append("width", values.width);
-    formData.append("height", values.height);
-    formData.append("weight", values.weight);
-    formData.append("country", values.country);
+  //   formData.append("title", values.title);
+  //   formData.append("dollarPrice", values.dollarPrice);
+  //   formData.append("cediPrice", values.cediPrice);
+  //   formData.append("dollarDiscount", values.dollarDiscount);
+  //   formData.append("cediDiscount", values.cediDiscount);
+  //   formData.append("length", values.length);
+  //   formData.append("width", values.width);
+  //   formData.append("height", values.height);
+  //   formData.append("weight", values.weight);
+  //   formData.append("country", values.country);
+  //   formData.append("assetImage", values.image)
 
-    // Handle asset image
-    const assetImageFile = values.assetImage?.file?.originFileObj;
+  //   try {
+  //     if (selected) {
+  //       await updateProductById(selected._id, formData);
+  //       message.success("Product updated successfully!");
+  //     } else {
+  //       await createProduct(formData);
+  //       message.success("Product created successfully!");
+  //     }
 
-    if (assetImageFile) {
-      formData.append("assetImage", assetImageFile);
-    } else if (selected?.image) {
-      formData.append("image", selected.image); // Maintain old image URL
-    }
-
-    try {
-      if (selected) {
-        await updateProductById(selected._id, formData);
-        message.success("Product updated successfully!");
-      } else {
-        await createProduct(formData);
-        message.success("Product created successfully!");
-      }
-
-      await getData(); // Refresh product data
-      form.resetFields();
-      handleDrawerClose();
-    } catch (error) {
-      message.error("Failed to save product details.");
-      console.error("Error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     await getData();
+  //     form.resetFields();
+  //     setImagePreview(null);
+  //     handleDrawerClose();
+  //   } catch (err) {
+  //     message.error("Error saving product.");
+  //     console.error(err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -398,133 +403,39 @@ const Dashboard = () => {
         placement="right"
         onClose={() => {
           setDrawerVisible(false);
-          form.resetFields();
+          form.reset();
         }}
         open={drawerVisible}
         width={window.innerWidth < 768 ? "100%" : 600}
       >
-        <Form ref={formRef} onFinish={onFinish} layout="vertical">
-          <Form.Item
-            label="Name"
-            name="title"
-            rules={[{ required: true, message: "Please enter product name" }]}
-          >
-            <Input placeholder="Enter product name" />
-          </Form.Item>
-          <Form.Item
-            label="Dollar Price"
-            name="dollarPrice"
-            rules={[{ required: true, message: "Please enter dollar price" }]}
-          >
-            <Input type="number" placeholder="Enter dollar price" />
-          </Form.Item>
-          <Form.Item
-            label="Cedi Price"
-            name="cediPrice"
-            rules={[{ required: true, message: "Please enter product price" }]}
-          >
-            <Input type="number" placeholder="Enter product price" />
-          </Form.Item>
-          <Form.Item
-            label="Dollar Discount Price"
-            name="dollarDiscount"
-            rules={[
-              { required: true, message: "Please enter dollar discount" },
-            ]}
-          >
-            <Input type="number" placeholder="Enter product dollar discount" />
-          </Form.Item>
-          <Form.Item
-            label="Cedi Discount Price"
-            name="cediDiscount"
-            rules={[{ required: true, message: "Please enter cedi discount" }]}
-          >
-            <Input type="number" placeholder="Enter product cedi discount" />
-          </Form.Item>
-          <Form.Item
-            label="Length"
-            name="length"
-            rules={[
-              { required: true, message: "Please enter product lenghth" },
-            ]}
-          >
-            <Input type="number" placeholder="Enter product length" />
-          </Form.Item>
-          <Form.Item
-            label="Width"
-            name="width"
-            rules={[{ required: true, message: "Please enter product width" }]}
-          >
-            <Input type="number" placeholder="Enter product width" />
-          </Form.Item>
-          <Form.Item
-            label="Height"
-            name="height"
-            rules={[{ required: true, message: "Please enter product height" }]}
-          >
-            <Input type="number" placeholder="Enter product height" />
-          </Form.Item>
-          <Form.Item
-            label="Weight"
-            name="weight"
-            rules={[{ required: true, message: "Please enter product weight" }]}
-          >
-            <Input type="number" placeholder="Enter product weight" />
-          </Form.Item>
-          <Form.Item label="Country" name="country">
-            <Select>
-              <Select.Option value="USA">USA</Select.Option>
-              <Select.Option value="Ghana">Ghana</Select.Option>
-            </Select>
-          </Form.Item>
+        <ProductForm
+          selected={selected}
+          loading={loading}
+          onSubmit={async (values) => {
+            setLoading(true);
+            const formData = new FormData();
 
-          <Form.Item name="assetImage" label="Asset Image">
-            <Upload
-              name="file"
-              showUploadList={false}
-              onRemove={() => setImagePreview(null)}
-              beforeUpload={(file) => {
-                const isImage =
-                  file.type === "image/png" || file.type === "image/jpeg";
-                if (!isImage) {
-                  message.error("You can only upload PNG or JPEG images!");
-                  return false; // stop the upload
-                }
-                handleBeforeUpload(file);
-                const isSmallEnough = file.size / 1024 / 1024 < 2; // 2MB
-                if (!isSmallEnough) {
-                  message.error("Image must be smaller than 2MB!");
-                  return false; // stop the upload
-                }
-                return true;
-              }}
-              onChange={({ fileList }) => {
-                form.setFieldsValue({ assetImage: fileList[0] });
-              }}
-            >
-              <Button icon={<UploadOutlined />}>Upload Asset Image</Button>
-            </Upload>
-            {imagePreview && (
-              <div style={{ marginTop: 16 }}>
-                <img
-                  src={imagePreview}
-                  alt="Selected"
-                  style={{ width: "100%", height: "auto", borderRadius: "8px" }}
-                />
-              </div>
-            )}
-          </Form.Item>
+            for (const key in values) {
+              formData.append(key, values[key]);
+            }
 
-          {/* Submit Button with Loading Indicator */}
-          <Button
-            className="w-full "
-            type="primary"
-            htmlType="submit"
-            loading={loading} // Show the loading spinner when form is submitting
-          >
-            {loading ? "Submitting..." : "Submit"} {/* Dynamic button text */}
-          </Button>
-        </Form>
+            try {
+              if (selected) {
+                await updateProductById(selected._id, formData);
+                message.success("Product updated successfully!");
+              } else {
+                await createProduct(formData);
+                message.success("Product created successfully!");
+              }
+              await getData();
+              handleDrawerClose();
+            } catch (err) {
+              message.error("Error saving product.");
+            } finally {
+              setLoading(false);
+            }
+          }}
+        />
       </Drawer>
     </div>
   );

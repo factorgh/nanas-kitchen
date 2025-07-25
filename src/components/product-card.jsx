@@ -50,17 +50,17 @@ const ProductCard = ({ product, handleAddToCart }) => {
           ease: "circInOut",
           duration: 0.5,
         }}
-        className="flex flex-col items-center "
+        className="flex flex-col items-center relative "
       >
         {/* Image */}
-        <div className="flex justify-end w-full ">
-          <div className="w-12 h-12 bg-[#FFE2C7] flex items-center justify-center rounded-3xl text-end">
-            Sale!
-          </div>
+
+        <div className="w-12 h-12 bg-[#FFE2C7] flex items-center justify-center rounded-3xl text-end absolute left-7">
+          Sale!
         </div>
+
         <img
           onClick={handleGoToDetail}
-          className="w-52 h-52 cursor-pointer"
+          className="w-52  cursor-pointer object-cover"
           src={product.image}
           alt={product.title}
         />
