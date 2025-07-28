@@ -31,7 +31,7 @@ const Header = () => {
       <div className="container mx-auto flex items-center justify-between px-5 lg:px-20 py-5">
         {/* Logo */}
         <Link to="/">
-          {storeConfig?.storeName === "NANA'S KITCHEN" ? (
+          {storeConfig?.storeName === "Nana's Kitchen" ? (
             <img
               src="/nana-logo.png"
               alt="nana-logo"

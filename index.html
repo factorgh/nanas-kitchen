@@ -4,16 +4,37 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/nana-logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nana Shito</title>
-    <meta
-      name="description"
-      content="Nana Shito best shito store with quality"
-    />
-    <meta property="og:title" content="Nana Shito" />
-    <meta
-      property="og:description"
-      content="Nana Shito best shito store with quality"
-    />
+    <title id="dynamic-title">Loading...</title>
+    <meta id="dynamic-og-title" property="og:title" content="" />
+    <meta id="dynamic-description" name="description" content="" />
+    <meta id="dynamic-og-description" property="og:description" content="" />
+
+    <script>
+      const host = window.location.hostname;
+      let siteName = "Nana Shito";
+      let description = "Nana Shito best shito store with quality";
+
+      if (host.includes("nanaskitchen")) {
+        siteName = "Nana's Kitchen";
+        description = "Nana's Kitchen - fresh, homemade meals just for you";
+      } else if (host.includes("nanashito")) {
+        siteName = "Nana Shito";
+        description = "Nana Shito best shito store with quality";
+      }
+
+      document.title = siteName;
+      document.querySelector("#dynamic-title").textContent = siteName;
+      document
+        .querySelector("#dynamic-og-title")
+        .setAttribute("content", siteName);
+      document
+        .querySelector("#dynamic-description")
+        .setAttribute("content", description);
+      document
+        .querySelector("#dynamic-og-description")
+        .setAttribute("content", description);
+    </script>
+
     <meta property="og:image" content="/nana-logo.png" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://yourwebsite.com" />

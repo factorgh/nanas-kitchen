@@ -1,7 +1,20 @@
 import { Form, Input } from "antd";
 import Wrapper from "../../components/wrapper";
+import { useMemo } from "react";
 
 const ContactPage = () => {
+  const email = useMemo(() => {
+    const host = window.location.hostname;
+
+    if (host.includes("nanaskitchen")) {
+      return "chef@nanaskitchen.net";
+    } else if (host.includes("nanashito")) {
+      return "chef@nanashito.com";
+    } else {
+      return "info@example.com";
+    }
+  }, []);
+
   return (
     <Wrapper>
       <div className="bg-[url('/contact.jpg')] bg-cover bg-center h-80 sm:h-[550px] w-full relative mb-10 md:mb-20">
@@ -20,12 +33,13 @@ const ContactPage = () => {
           <p className="mb-5">7850 W. GrandParkway</p>
           <p className="mb-5">South, Richmond,</p>
           <p className="mb-5">Texas 77406</p>
+
           <h5 className="mt-5">Phone & Email</h5>
           <p className="mb-5">
             Tel: +1 8322769667 || +233 534789333 || +233 024 2492556
           </p>
           <p className="mb-20">
-            <strong>Email</strong>: chef@nanaskitchen.net
+            <strong>Email</strong>: {email}
           </p>
 
           <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-5">

@@ -18,6 +18,8 @@ const HomePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const { userCountry } = useContext(CountryContext);
 
   // Current country of user
@@ -42,8 +44,15 @@ const HomePage = () => {
   // Get all products
   useEffect(() => {
     const getProducts = async () => {
-      const res = await getAllProducts();
-      setProducts(res);
+      setLoading(true); // Start loading
+      try {
+        const res = await getAllProducts();
+        setProducts(res);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setLoading(false); // End loading
+      }
     };
     getProducts();
   }, []);
@@ -149,9 +158,18 @@ const HomePage = () => {
         transition={{ duration: 0.8, ease: "circInOut" }}
         className="container mx-auto px-4 md:px-8 lg:px-16 mb-10 mt-10"
       >
-        {products.length === 0 ? (
-          <div className="">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5 text-center">
+        {loading ? (
+          <div
+            id="products"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
+            {[...Array(8)].map((_, index) => (
+              <Card key={index} loading={true} className="h-[300px] border-0" />
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-5">
               No products available
             </h1>
           </div>
@@ -162,12 +180,12 @@ const HomePage = () => {
           >
             {products.map((product) => (
               <ProductCard
+                key={product._id}
+                product={product}
                 handleAddToCart={() => {
                   handleAddToCart(product);
                   handleDollarAddToCart(product);
                 }}
-                key={product._id}
-                product={product}
               />
             ))}
           </div>
