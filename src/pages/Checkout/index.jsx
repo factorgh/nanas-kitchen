@@ -152,60 +152,56 @@ const CheckoutPage = () => {
 
   //   updateShippingCost();
   // }, [updatedCartItems, postalCode]);
-     const updateShippingCost = async () => {
-      if (!postalCode || updatedCartItems.length === 0) return;
+const updateShippingCost = async () => {
+  if (!postalCode || updatedCartItems.length === 0) return;
 
-      setIsLoadingShippingCost(true);
-      // const weight = calculateWeight(updatedCartItems);
-      // const dimensions = calculateDimensions(updatedCartItems);
-      const userData = {
-        zip: postalCode,
-        country: userCountry,
-        name:
-          form.getFieldValue("firstName") +
-          " " +
-          form.getFieldValue("lastName"),
-        email: form.getFieldValue("email"),
-        phone: form.getFieldValue("phone"),
-        street: form.getFieldValue("address"),
-        city: form.getFieldValue("city"),
-        state: form.getFieldValue("state"),
-        country: userCountry,
-      };
+  setIsLoadingShippingCost(true);
 
-      // Check it a valid usa zip
-      const res = await fetch("https://api.zippopotam.us/us/" + postalCode);
-      if (res.status === 404) {
-        setIsValidZip(false);
-        setError("Invalid Zip Code .Please enter a valid US zip code.");
-        return;
-      } else {
-        setIsValidZip(true);
-      }
-
-      try {
-        const cost = await fetchShippoRates(userData, userCountry, cartItems);
-        console.log(
-          "-----------------------------shipping rate status------------------------------",
-          cost
-        );
-        console.log(cost);
-        if (cost === 0) {
-
-          setIsShppingRateEmpty(true);
-          message.info("Shipping rate is empty");
-        } else {
-          setIsShppingRateEmpty(false);
-          message.info("Shipping rate is available");
-        }
-        setShippingCost(cost);
-      } catch (error) {
-        console.error("Failed to update shipping cost:", error);
-        setShippingCost(0);
-      } finally {
-        setIsLoadingShippingCost(false); // End loading state
-      }
+  try {
+    const userData = {
+      zip: postalCode,
+      country: userCountry,
+      name: `${form.getFieldValue("firstName")} ${form.getFieldValue("lastName")}`,
+      email: form.getFieldValue("email"),
+      phone: form.getFieldValue("phone"),
+      street: form.getFieldValue("address"),
+      city: form.getFieldValue("city"),
+      state: form.getFieldValue("state"),
+      country: userCountry,
     };
+
+    // Validate US ZIP code
+    const zipRes = await fetch(`https://api.zippopotam.us/us/${postalCode}`);
+    if (!zipRes.ok) {
+      setIsValidZip(false);
+      setError("Invalid Zip Code. Please enter a valid US zip code.");
+      return;
+    } else {
+      setIsValidZip(true);
+    }
+
+    const cost = await fetchShippoRates(userData, userCountry, cartItems);
+
+    console.log("Shipping rate response:", cost);
+
+    if (cost === 0) {
+      setIsShppingRateEmpty(true);
+      message.info("Shipping rate is empty");
+    } else {
+      setIsShppingRateEmpty(false);
+      message.info("Shipping rate is available");
+    }
+
+    setShippingCost(cost);
+  } catch (error) {
+    console.error("Failed to update shipping cost:", error);
+    setShippingCost(0);
+    setError("An unexpected error occurred while calculating shipping.");
+  } finally {
+    // Always stop loading regardless of outcome
+    setIsLoadingShippingCost(false);
+  }
+};
 
   // useEffect(() => {
   //   const checkShipServices = async () => {
