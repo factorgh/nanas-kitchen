@@ -63,6 +63,8 @@ export const fetchShippingRate = async (
   }
 };
 
+
+
 export const fetchShippoRates = async (
   userData,
   userCountry,
@@ -74,7 +76,7 @@ export const fetchShippoRates = async (
       fromAddress: {
         name: "Nana's Shito",
         street1: "17850 W. GrandParkway",
-        city: "Los Angeles",
+        city: "Richmond",
         state: "TX",
         zip: "77406",
         country: "US",

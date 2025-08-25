@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import CartItem from "../../components/cart-item";
 import manualLocations from "../../utils/manual-locations";
 
+
 import { CloseSquareFilled } from "@ant-design/icons";
 import { useForm } from "antd/es/form/Form";
 import EmptyCart from "../../components/empty-cart";
@@ -78,6 +79,12 @@ const CheckoutPage = () => {
   const [isGeoEnabled, setIsGeoEnabled] = useState(false);
   const [showStripe, setShowStripe] = useState(false);
   const [isValidZip, setIsValidZip] = useState(true);
+    const [checked, setChecked] = useState(false);
+
+  const handleChange = (e) => {
+    setChecked(e.target.checked);
+  };
+
 
   const [userData, setUserData] = useState({
     firsName: "",
@@ -140,8 +147,12 @@ const CheckoutPage = () => {
   }, [userCountry, form]);
 
   // UseEffect that gets shipping cost
-  useEffect(() => {
-    const updateShippingCost = async () => {
+  // useEffect(() => {
+ 
+
+  //   updateShippingCost();
+  // }, [updatedCartItems, postalCode]);
+     const updateShippingCost = async () => {
       if (!postalCode || updatedCartItems.length === 0) return;
 
       setIsLoadingShippingCost(true);
@@ -163,7 +174,7 @@ const CheckoutPage = () => {
       };
 
       // Check it a valid usa zip
-      const res = await fetch("http://api.zippopotam.us/us/" + postalCode);
+      const res = await fetch("https://api.zippopotam.us/us/" + postalCode);
       if (res.status === 404) {
         setIsValidZip(false);
         setError("Invalid Zip Code .Please enter a valid US zip code.");
@@ -180,9 +191,12 @@ const CheckoutPage = () => {
         );
         console.log(cost);
         if (cost === 0) {
+
           setIsShppingRateEmpty(true);
+          message.info("Shipping rate is empty");
         } else {
           setIsShppingRateEmpty(false);
+          message.info("Shipping rate is available");
         }
         setShippingCost(cost);
       } catch (error) {
@@ -192,9 +206,6 @@ const CheckoutPage = () => {
         setIsLoadingShippingCost(false); // End loading state
       }
     };
-
-    updateShippingCost();
-  }, [updatedCartItems, postalCode]);
 
   // useEffect(() => {
   //   const checkShipServices = async () => {
@@ -685,6 +696,7 @@ const CheckoutPage = () => {
                     </Form.Item>
                   </Col>
                 )}
+                
                 {userCountry !== "GHANA" && (
                   <Col span={12}>
                     <Form.Item
@@ -748,9 +760,41 @@ const CheckoutPage = () => {
                       />
                     )}
                   </Col>
+
+                  // Add button for users to confirm their address
+                  
                 )}
+               
               </Row>
 
+              
+              {/* add a checkbox and the button to confirm the address */}
+              {/* Todo:add a checkbox to confirm the address */}
+              
+                    
+              <div className="flex items-center gap-3">
+           
+ {userCountry === "USA" && (
+               
+                    <Form.Item>
+                      <Button
+                      size="large"
+                        className="mt-4 bg-red-500 hover:bg-red-600 text-white rounded-md"
+                        type="outlined"
+                        onClick={updateShippingCost}
+                        disabled={isLoadingShippingCost}
+                      >
+                        {isLoadingShippingCost
+                          ? "Loading..."
+                          : "Confirm your Address "}
+                      </Button>
+                    </Form.Item>
+           
+                )}
+       
+           </div>
+
+              {/* End of check box and confirm address button  */}
               <h4 className="text-xl font-bold mb-5 mt-5">Location</h4>
               {userCountry === "GHANA" && (
                 <div

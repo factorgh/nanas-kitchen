@@ -83,7 +83,7 @@ const Orders = () => {
       addressFrom: {
         name: "Nana's Shito",
         street1: "17850 W. GrandParkway",
-        city: "Los Angeles",
+        city: "Richmond",
         state: "TX",
         zip: "77406",
         country: "US",
