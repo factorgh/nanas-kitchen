@@ -4,49 +4,71 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/nana-logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title id="dynamic-title">Loading...</title>
+
+    <!-- Dynamic meta tags -->
     <meta id="dynamic-og-title" property="og:title" content="" />
     <meta id="dynamic-description" name="description" content="" />
     <meta id="dynamic-og-description" property="og:description" content="" />
+    <meta id="dynamic-og-url" property="og:url" content="" />
+
     <meta name="google-site-verification" content="cxYYrPVQpxrB4QiCeHm3Lx7zX9TSxi4aSz7y9Iu_4o4" />
 
+    <!-- Initial dummy title (overwritten by script) -->
+    <title id="dynamic-title">Nana Shito</title>
+
+    <!-- Static image -->
+    <meta property="og:image" content="/nana-logo.png" />
+    <meta property="og:type" content="website" />
+
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="mask-icon" href="/mask-icon.svg" color="#FFFFFF" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <!-- 🚀 Dynamic logic script -->
     <script>
       const host = window.location.hostname;
+      const origin = window.location.origin;
+
       let siteName = "Nana Shito";
-      let description = "Nana Shito best shito store with quality";
+      let description = "Nana Shito - best shito store with quality";
+      let ogUrl = origin;
 
       if (host.includes("nanaskitchen")) {
         siteName = "Nana's Kitchen";
         description = "Nana's Kitchen - fresh, homemade meals just for you";
       } else if (host.includes("nanashito")) {
         siteName = "Nana Shito";
-        description = "Nana Shito best shito store with quality";
+        description = "Nana Shito - best shito store with quality";
       }
 
+      // Set <title>
       document.title = siteName;
       document.querySelector("#dynamic-title").textContent = siteName;
+
+      // Set Open Graph meta tags
       document
         .querySelector("#dynamic-og-title")
         .setAttribute("content", siteName);
+
       document
         .querySelector("#dynamic-description")
         .setAttribute("content", description);
+
       document
         .querySelector("#dynamic-og-description")
         .setAttribute("content", description);
-    </script>
 
-    <meta property="og:image" content="/nana-logo.png" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://nanaskitchen.net" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
-    <link rel="mask-icon" href="/mask-icon.svg" color="#FFFFFF" />
-    <meta name="theme-color" content="#ffffff" />
+      document
+        .querySelector("#dynamic-og-url")
+        .setAttribute("content", ogUrl);
+    </script>
   </head>
+
   <body>
     <div id="root">
       <p>Loading...</p>
     </div>
+
     <script type="module" src="/src/main.jsx"></script>
     <script src="https://js.paystack.co/v1/inline.js" defer></script>
   </body>

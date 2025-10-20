@@ -43,6 +43,17 @@ export const getAllOrders = async () => {
   }
 };
 
+// Get only completed and delivered orders
+export const getCompletedDeliveredOrders = async () => {
+  try {
+    const response = await axiosInstance.get("/orders/completed-delivered");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching completed and delivered orders:", error);
+    throw error;
+  }
+};
+
 // Get all carriesCodes
 export const getCarriersCode = async () => {
   try {

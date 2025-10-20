@@ -15,6 +15,7 @@ import SuccessPage from "./pages/Success";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { setStoreConfig } from "./store/slices/storeConfigSlice";
+import AllOrdersPage from "./pages/AllOrders";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -150,6 +151,14 @@ const App = () => {
             element={
               <Layout>
                 <AdminReviewsPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="all-orders"
+            element={
+              <Layout>
+                <AllOrdersPage />
               </Layout>
             }
           />

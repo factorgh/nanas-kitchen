@@ -52,6 +52,7 @@ const DashboardLayout = () => {
     "/admin/dashboard": "1",
     "/admin/orders": "2",
     "/admin/reviews": "3",
+    "/admin/all-orders": "4",
   };
 
   const selectedKey = menuKeyMap[location.pathname] || "1";
@@ -82,8 +83,11 @@ const DashboardLayout = () => {
           <Menu.Item key="3" icon={<MessageSquareText size={20} />}>
             <Link to="/admin/reviews">Reviews</Link>
           </Menu.Item>
+          <Menu.Item key="4" icon={<UserOutlined />}>
+            <Link to="/admin/all-orders">All Orders</Link>
+          </Menu.Item>
 
-          <Menu.Item key="4" icon={<LogoutOutlined />}>
+          <Menu.Item key="5" icon={<LogoutOutlined />}>
             <Link onClick={handleLogout} to="/">
               Logout
             </Link>
