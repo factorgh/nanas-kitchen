@@ -770,7 +770,7 @@ const updateShippingCost = async () => {
                     
               <div className="flex items-center gap-3">
            
- {userCountry === "USA" && (
+ {userCountry !== "GHANA" && (
                
                     <Form.Item>
                       <Button
